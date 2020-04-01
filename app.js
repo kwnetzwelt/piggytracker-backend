@@ -1,9 +1,11 @@
 const Express = require("express");
+const Cors = require("cors");
 const Mongoose = require("mongoose");
 const BodyParser = require("body-parser");
 
 var app = Express();
 
+app.use(Cors());
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
 
@@ -16,13 +18,7 @@ const BillModel = Mongoose.model("bill",{
     category:String
 });
 
-const PersonModel = Mongoose.model("person",{
-    name:String
-});
 
-const CategoryModel = Mongoose.model("category",{
-    category:String
-});
 
 app.post("/bill", async (request, response) => {
     try {
@@ -102,6 +98,8 @@ app.delete("/category/:id", async (request, response) => {
 });
 
 */
+
+
 app.listen(3000, () => {
     console.log("Listening at :3000...");
 });
