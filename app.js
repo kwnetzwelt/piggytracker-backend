@@ -33,14 +33,6 @@ app.post("/bill", async (request, response) => {
         response.status(500).send(error);
     }
 });
-app.get("/bills", async (request, response) => {
-    try {
-        var result = await BillModel.find().exec();
-        response.send(result);
-    }catch(error) {
-        response.status(500).send(error);
-    }
-});
 
 app.get("/bill/:id", async (request, response) => {
     try {
@@ -70,6 +62,17 @@ app.delete("/bill/:id", async (request, response) => {
         response.status(500).send(error);
     }
 });
+
+
+app.get("/bills", async (request, response) => {
+    try {
+        var result = await BillModel.find().lean().exec();
+        response.send(result);
+    }catch(error) {
+        response.status(500).send(error);
+    }
+});
+
 /*
 app.post("/person", async (request, response) => {
 

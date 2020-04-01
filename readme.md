@@ -6,5 +6,5 @@
 * mongodb
 
 # Run it
-
-node start
+npm install
+npm start
