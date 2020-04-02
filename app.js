@@ -1,13 +1,12 @@
 const Express = require("express");
 const Cors = require("cors");
-const Mongoose = require("mongoose");
 const BodyParser = require("body-parser");
 const passport = require("passport");
 const Strategy = require("passport-local").Strategy;
+const Config = require("./config");
+const Model = require("./model");
 
-
-
-
+Model.connect(Config.dbUrl);
 
 // Configure the local strategy for use by Passport.
 //
@@ -17,7 +16,7 @@ const Strategy = require("passport-local").Strategy;
 // will be set at `req.user` in route handlers after authentication.
 passport.use(new Strategy(
     function(username, password, done) {
-      UserModel.findOne({"username" : username}, function(err, user){
+      Model.UserModel.findOne({"username" : username}, function(err, user){
         if(err) {return done(err);}
         if(!user) {return done(null, false,     {message:"incorrect username. "})}
         if(!validPassword(user,password)) {
@@ -41,27 +40,18 @@ passport.use(new Strategy(
   
   passport.deserializeUser(function(id, done) {
     //If using Mongoose with MongoDB; if other you will need JS specific to that schema.
-    UserModel.findById(id, (err, user) => {
+    Model.UserModel.findById(id, (err, user) => {
         done(err, user);
     });
   });
 
-  const UserModel = Mongoose.model("user",{
-      username:String,
-      password:String
-  });
-
-const BillModel = Mongoose.model("bill",{
-    date:Date,
-    amount:Number,
-    person:String,
-    category:String
-});
 
 function validPassword(user, password)
 {
-    return user.password == password;
+    return user.password == Model.hashPassword(password);
 }
+
+
 var app = Express();
 
 app.use(Cors());
@@ -71,7 +61,6 @@ app.use(require('express-session')({ secret: 'haushaltssperre', resave: false, s
 app.use(passport.initialize());
 app.use(passport.session());
 
-Mongoose.connect("mongodb://localhost/haushalt");
 
   
 app.post("/login", passport.authenticate('local', { failureRedirect: '/login' }), (request, response) => {
@@ -89,7 +78,7 @@ app.post("/logout", async (req, res) => {
 
 app.post("/bill",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
     try {
-        var bill = new BillModel(request.body);
+        var bill = new Model.BillModel(request.body);
         var result = await bill.save();
         response.send(result);
     }catch(error) {
@@ -99,7 +88,7 @@ app.post("/bill",require('connect-ensure-login').ensureLoggedIn(), async (reques
 
 app.get("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
     try {
-        var bill = await BillModel.findById(request.params.id).exec();
+        var bill = await Model.BillModel.findById(request.params.id).exec();
         response.send(bill);
     } catch (error) {
         response.status(500).send(error);
@@ -108,7 +97,7 @@ app.get("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (req
 
 app.put("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
     try {
-        var bill = await BillModel.findById(request.params.id).exec();
+        var bill = await Model.BillModel.findById(request.params.id).exec();
         bill.set(request.body);
         var result = await bill.save();
         response.send(result);
@@ -119,7 +108,7 @@ app.put("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (req
 
 app.delete("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
     try {
-        var result = await BillModel.deleteOne({ _id: request.params.id }).exec();
+        var result = await Model.BillModel.deleteOne({ _id: request.params.id }).exec();
         response.send(result);
     } catch (error) {
         response.status(500).send(error);
@@ -129,7 +118,7 @@ app.delete("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (
 
 app.get("/bills",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
     try {
-        var result = await BillModel.find().lean().exec();
+        var result = await Model.BillModel.find().lean().exec();
         response.send(result);
     }catch(error) {
         response.status(500).send(error);
