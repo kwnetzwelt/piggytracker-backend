@@ -51,10 +51,14 @@ function validPassword(user, password)
     return user.password == Model.hashPassword(password);
 }
 
-
+var corsOptions = {
+    origin: 'http://localhost:8080',
+    credentials: true,
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+  }
 var app = Express();
 
-app.use(Cors());
+app.use(Cors(corsOptions));
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
 app.use(require('express-session')({ secret: 'haushaltssperre', resave: false, saveUninitialized: false }));
@@ -63,9 +67,11 @@ app.use(passport.session());
 
 
   
-app.post("/login", passport.authenticate('local', { failureRedirect: '/login' }), (request, response) => {
+app.post("/login", passport.authenticate('local', { failureRedirect: '/login' }), async (request, response) => {
     try{
-        response.send({"message":"ok"});
+        var user = await Model.UserModel.findOne({"username" : request.body.username}).exec();
+        user.password = "";
+        response.send(user);
     }catch(error){
         response. status(500).send(error);
     }

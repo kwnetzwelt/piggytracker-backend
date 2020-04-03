@@ -15,6 +15,7 @@ module.exports = {
     },
     UserModel : Mongoose.model("user",{
         username:String,
+        fullname:String,
         password:String
     }),
 
@@ -22,6 +23,7 @@ module.exports = {
         date:Date,
         amount:Number,
         person:String,
-        category:String
+        category:String,
+        comment:String
     })
 }

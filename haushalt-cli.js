@@ -36,12 +36,13 @@ program
 .command('createuser <username>')
 .description("create user ")
 .action(async(username) =>{
+    var fullname = getConsoleInput("Enter Full Name: ");
     var newpassword = getConsoleInput('Enter new password: ');
     newpassword = Model.hashPassword(newpassword);
 
     Model.connect(Config.dbUrl);
     try{
-        var newuser = new Model.UserModel({"username":username,"password":newpassword});
+        var newuser = new Model.UserModel({"username":username,"fullname":fullname,"password":newpassword});
         await newuser.save();
     }catch(error)
     {
