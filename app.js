@@ -73,7 +73,19 @@ app.post("/login", passport.authenticate('local', { failureRedirect: '/login' })
         user.password = "";
         response.send(user);
     }catch(error){
-        response. status(500).send(error);
+        response.status(500).send(error);
+    }
+});
+
+app.get("/login",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
+    try{
+        if(request.isAuthenticated)
+            var user = request.user;
+            user.password = "";
+            response.send(user);
+        
+    }finally{
+        response.status(500).send();
     }
 });
 
