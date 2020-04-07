@@ -1,32 +1,38 @@
 const Express = require("express");
 const Cors = require("cors");
 const BodyParser = require("body-parser");
+const jwt = require('jsonwebtoken');
+
 const passport = require("passport");
-const Strategy = require("passport-local").Strategy;
+
+var passportJWT = require("passport-jwt");
+
+var ExtractJwt = passportJWT.ExtractJwt;
+var JwtStrategy = passportJWT.Strategy;
+
 const Config = require("./config");
 const Model = require("./model");
 
+
 Model.connect(Config.dbUrl);
 
-// Configure the local strategy for use by Passport.
-//
-// The local strategy require a `verify` function which receives the credentials
-// (`username` and `password`) submitted by the user.  The function must verify
-// that the password is correct and then invoke `cb` with a user object, which
-// will be set at `req.user` in route handlers after authentication.
-passport.use(new Strategy(
-    function(username, password, done) {
-      Model.UserModel.findOne({"username" : username}, function(err, user){
-        if(err) {return done(err);}
-        if(!user) {return done(null, false,     {message:"incorrect username. "})}
-        if(!validPassword(user,password)) {
-            return done(null, false, {message:"incorrect password. "});
+var jwtOptions = {}
+jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+jwtOptions.secretOrKey = Config.pwd_salt;
+
+var strategy = new JwtStrategy(jwtOptions, async function(jwt_payload, next) {
+  console.log('payload received', jwt_payload);
+  // usually this would be a database call:
+  await Model.UserModel.findById(jwt_payload.id, function(err, user){
+        if (user) {
+            next(null, user);
+        } else {
+            next(null, false);
         }
-        return done(null, user);
-      });
-    }));
-  
-  
+    });
+});
+
+passport.use(strategy);
   // Configure Passport authenticated session persistence.
   //
   // In order to restore authentication state across HTTP requests, Passport needs
@@ -34,16 +40,16 @@ passport.use(new Strategy(
   // typical implementation of this is as simple as supplying the user ID when
   // serializing, and querying the user record by ID from the database when
   // deserializing.
-  passport.serializeUser(function(user, done) {
-    done(null, user._id);
-  });
+//   passport.serializeUser(function(user, done) {
+//     done(null, user._id);
+//   });
   
-  passport.deserializeUser(function(id, done) {
-    //If using Mongoose with MongoDB; if other you will need JS specific to that schema.
-    Model.UserModel.findById(id, (err, user) => {
-        done(err, user);
-    });
-  });
+//   passport.deserializeUser(function(id, done) {
+//     //If using Mongoose with MongoDB; if other you will need JS specific to that schema.
+//     Model.UserModel.findById(id, (err, user) => {
+//         done(err, user);
+//     });
+//   });
 
 
 function validPassword(user, password)
@@ -52,8 +58,8 @@ function validPassword(user, password)
 }
 
 var corsOptions = {
-    origin: 'http://localhost:8080',
-    credentials: true,
+    origin: 'http://localhost:3000',
+    //credentials: true,
     optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
   }
 var app = Express();
@@ -61,23 +67,43 @@ var app = Express();
 app.use(Cors(corsOptions));
 app.use(BodyParser.json());
 app.use(BodyParser.urlencoded({ extended: true }));
-app.use(require('express-session')({ secret: 'haushaltssperre', resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
-app.use(passport.session());
 
 
-  
-app.post("/login", passport.authenticate('local', { failureRedirect: '/login' }), async (request, response) => {
+app.get("/secretDebug",
+  function(req, res, next){
+    console.log(req.get('Authorization'));
+    next();
+  }, function(req, res){
+    res.json("debugging");
+});
+app.options("/", Cors());
+//https://jonathanmh.com/express-passport-json-web-token-jwt-authentication-beginners/
+//passport.authenticate('JWT', { session: false })
+app.post("/login", async (request, response) => {
     try{
         var user = await Model.UserModel.findOne({"username" : request.body.username}).exec();
-        user.password = "";
-        response.send(user);
+        var hash = Model.hashPassword(request.body.password);
+        if(!user){
+            response.status(401).json({"message":"user not found"});
+        }
+        if(hash === user.password)
+        {
+            // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
+            var userProfile = Model.convertToProfile(user);
+            var payload = {id: user.id};
+            var token = jwt.sign(payload, jwtOptions.secretOrKey);
+            response.json({message: "ok", token: token, userProfile: userProfile});
+        }else{
+            response.status(401).json({"message":"invalid password"});
+        }
     }catch(error){
-        response.status(500).send(error);
+        if(!response.headersSent)
+            response.status(500).send(error);
     }
 });
 
-app.get("/login",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
+app.get("/login",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try{
         if(request.isAuthenticated)
             var user = request.user;
@@ -90,13 +116,14 @@ app.get("/login",require('connect-ensure-login').ensureLoggedIn(), async (reques
 });
 
 app.post("/logout", async (req, res) => {
-    req.logout();
+    await req.logout();
     res.send({"message":"ok"});
 });
 
-app.post("/bill",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
+app.post("/bill",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
         var bill = new Model.BillModel(request.body);
+        bill.changed = new Date();
         var result = await bill.save();
         response.send(result);
     }catch(error) {
@@ -104,7 +131,7 @@ app.post("/bill",require('connect-ensure-login').ensureLoggedIn(), async (reques
     }
 });
 
-app.get("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
+app.get("/bill/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
         var bill = await Model.BillModel.findById(request.params.id).exec();
         response.send(bill);
@@ -113,10 +140,11 @@ app.get("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (req
     }
 });
 
-app.put("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
+app.put("/bill/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
         var bill = await Model.BillModel.findById(request.params.id).exec();
         bill.set(request.body);
+        bill.changed = new Date();
         var result = await bill.save();
         response.send(result);
     } catch (error) {
@@ -124,7 +152,7 @@ app.put("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (req
     }
 });
 
-app.delete("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
+app.delete("/bill/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
         var result = await Model.BillModel.deleteOne({ _id: request.params.id }).exec();
         response.send(result);
@@ -134,10 +162,14 @@ app.delete("/bill/:id",require('connect-ensure-login').ensureLoggedIn(), async (
 });
 
 
-app.get("/bills",require('connect-ensure-login').ensureLoggedIn(), async (request, response) => {
+app.get("/bills",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var result = await Model.BillModel.find().lean().exec();
-        response.send(result);
+        var perPage = Math.max(0,Math.min(5000,parseInt( request.query.perPage)));
+        var page = Math.max(0,parseInt(request.query.page));
+        console.log(perPage + " " + page)
+        var result = await Model.BillModel.find().sort([["date",-1]]).skip((page-1) * perPage).limit(perPage).lean().exec();
+        var countResult = await Model.BillModel.count();
+        response.send({data:result,page:page,total:countResult});
     }catch(error) {
         response.status(500).send(error);
     }
@@ -174,6 +206,6 @@ app.delete("/category/:id", async (request, response) => {
 */
 
 
-app.listen(3000, () => {
-    console.log("Listening at :3000...");
+app.listen(3030, () => {
+    console.log("Listening at :3030...");
 });

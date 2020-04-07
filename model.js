@@ -13,6 +13,12 @@ module.exports = {
             .digest('hex');
         return hash.trim();
     },
+    convertToProfile : (user) => {
+        return {
+            username : user.username,
+            fullname : user.fullname
+        };
+    },
     UserModel : Mongoose.model("user",{
         username:String,
         fullname:String,
@@ -21,9 +27,10 @@ module.exports = {
 
     BillModel : Mongoose.model("bill",{
         date:Date,
-        amount:Number,
-        person:String,
+        value:Number,
+        remunerator:String,
         category:String,
-        comment:String
+        info:String,
+        changed:Date
     })
 }
