@@ -31,6 +31,7 @@ module.exports = {
         remunerator:String,
         category:String,
         info:String,
-        changed:Date
+        changed:Date,
+        dummy:Boolean
     })
 }

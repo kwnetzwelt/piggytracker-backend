@@ -31,6 +31,49 @@ program
     });
 });
 
+program
+.command('dummies <action>')
+.description("Manage Dummy Entries action=create||remove")
+.action(async(action) =>{
+    
+    Model.connect(Config.dbUrl);
+    
+    try{
+        if(action === "create")
+        {
+            var bills = [];
+            var date = new Date();
+            var count = 1000;
+            for(var i = 0;i<count;i++)
+            {
+                var bill = new Model.BillModel({
+                    date: new Date().setHours(new Date().getHours() -2 * i),
+                    value: (Math.random()*100).toFixed(2),
+                    remunerator: ["Bert","Joan","Bob"][Math.floor(Math.random() * 3)],
+                    category:["Sushi","Car","Baby","House"][Math.floor(Math.random() * 4)],
+                    info:["","Others have content","Some of these are empty on purpose"][Math.floor(Math.random() * 3)],
+                    changed:new Date(),
+                    dummy:true});
+                await bill.save();
+                console.log((i+1) + " / " + count);
+            }   
+        }
+        else if(action === "remove")
+        {
+            await Model.BillModel.remove({dummy:true},(err) => {
+                console.log("done");
+            });
+        } else {
+            throw new Error("unrecognized option");
+        }
+    }catch(error)
+    {
+        console.log(error);
+        process.exit(1);
+    }
+    process.exit(0);
+    
+});
 
 program
 .command('createuser <username>')
