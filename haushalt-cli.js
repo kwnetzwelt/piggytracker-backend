@@ -32,9 +32,9 @@ program
 });
 
 program
-.command('dummies <action>')
-.description("Manage Dummy Entries action=create||remove")
-.action(async(action) =>{
+.command('dummies <action> <amount>')
+.description("Manage Dummy Entries <action>['create','remove'] <amount>[uint]")
+.action(async(action,amount) =>{
     
     Model.connect(Config.dbUrl);
     
@@ -43,7 +43,7 @@ program
         {
             var bills = [];
             var date = new Date();
-            var count = 1000;
+            var count = (parseInt(amount)>0)? amount : 1000;
             for(var i = 0;i<count;i++)
             {
                 var bill = new Model.BillModel({
