@@ -175,6 +175,64 @@ app.get("/bills",passport.authenticate('jwt', { session: false }), async (reques
     }
 });
 
+
+app.post("/target",passport.authenticate('jwt', { session: false }), async (request, response) => {
+    try {
+        var target = new Model.TargetModel(request.body);
+        target.tid = Model.hashPassword( target.month + "" + target.category );
+        var anyInStore = await Model.TargetModel.findOne({tid:target.tid});
+        if(anyInStore)
+        {
+            response.status(500).send("already a Target with this tid. ");
+        }else
+        {
+            var result = await target.save();
+            response.send(result);
+        }
+    }catch(error) {
+        response.status(500).send(error);
+    }
+});
+
+app.get("/target/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
+    try {
+        var target = await Model.TargetModel.findById(request.params.id).exec();
+        response.send(target);
+    } catch (error) {
+        response.status(500).send(error);
+    }
+});
+
+app.put("/target/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
+    try {
+        var target = await Model.TargetModel.findById(request.params.id).exec();
+        target.set(request.body);
+        var result = await target.save();
+        response.send(result);
+    } catch (error) {
+        response.status(500).send(error);
+    }
+});
+
+
+app.delete("/target/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
+    try {
+        var result = await Model.TargetModel.deleteOne({ _id: request.params.id }).exec();
+        response.send(result);
+    } catch (error) {
+        response.status(500).send(error);
+    }
+});
+
+app.get("/targets",passport.authenticate('jwt', { session: false }), async (request, response) => {
+    try {
+        var result = await Model.TargetModel.find().lean().exec();
+        response.send({data:result});
+    }catch(error) {
+        response.status(500).send(error);
+    }
+});
+
 /*
 app.post("/person", async (request, response) => {
 

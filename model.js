@@ -33,5 +33,11 @@ module.exports = {
         info:String,
         changed:Date,
         dummy:Boolean
+    }),
+    TargetModel : Mongoose.model("target",{
+        category:String,
+        month:Number,
+        tid:{type:String, unique:true},
+        value:Number
     })
 }
