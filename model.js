@@ -23,7 +23,7 @@ module.exports = {
         username:String,
         fullname:String,
         password:String
-    }),
+    }), 
 
     BillModel : Mongoose.model("bill",{
         date:Date,
@@ -34,10 +34,9 @@ module.exports = {
         changed:Date,
         dummy:Boolean
     }),
+
     TargetModel : Mongoose.model("target",{
-        category:String,
-        month:Number,
-        tid:{type:String, unique:true},
-        value:Number
+        totals:Array, // objects: {category:CATEGORYNAME,value:VALUE}
+        tid:{type:Number, unique:true}
     })
 }

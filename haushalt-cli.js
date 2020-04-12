@@ -57,6 +57,16 @@ program
                 await bill.save();
                 console.log((i+1) + " / " + count);
             }   
+            var target = new Model.TargetModel({
+                tid:new Date().getFullYear()*12 + new Date().getMonth(),
+                totals:[
+                    {category:"Sushi",value:120},
+                    {category:"Car",value:220},
+                    {category:"Baby",value:420},
+                    {category:"House",value:1200},
+                ]
+            })
+            await target.save();
         }
         else if(action === "remove")
         {
@@ -74,6 +84,9 @@ program
     process.exit(0);
     
 });
+
+
+
 
 program
 .command('createuser <username>')
