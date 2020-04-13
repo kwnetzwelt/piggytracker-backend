@@ -179,7 +179,6 @@ app.get("/bills",passport.authenticate('jwt', { session: false }), async (reques
 app.post("/target",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
         var target = new Model.TargetModel(request.body);
-        target.tid = Model.hashPassword( target.month + "" + target.category );
         var anyInStore = await Model.TargetModel.findOne({tid:target.tid});
         if(anyInStore)
         {
