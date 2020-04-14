@@ -87,6 +87,34 @@ program
 
 
 
+program
+.command('setavatar <username> <url>')
+.description("set avatar user ")
+.action(async (username, url) =>{
+    
+    Model.connect(Config.dbUrl);
+    Model.UserModel.findOne({"username":username},async (err,user) => {
+        if(!user){
+            console.log("user not found. ");
+        }
+        if(err){
+            console.log(err);
+            process.exit(1);
+        }
+        try{
+            user.ver
+            user.avatarUrl = url;
+            var result = await user.save();
+        }catch(error)
+        {
+            console.log(error);
+            process.exit(1);
+        }
+        process.exit(0);
+    });
+    
+});
+
 
 program
 .command('createuser <username>')

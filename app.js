@@ -262,6 +262,7 @@ app.delete("/category/:id", async (request, response) => {
 
 */
 
+app.use('/static', express.static(path.join(__dirname, 'public')))
 
 app.listen(3030, () => {
     console.log("Listening at :3030...");

@@ -22,7 +22,8 @@ module.exports = {
     UserModel : Mongoose.model("user",{
         username:String,
         fullname:String,
-        password:String
+        password:String,
+        avatarUrl:String
     }), 
 
     BillModel : Mongoose.model("bill",{
