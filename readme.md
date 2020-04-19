@@ -15,7 +15,7 @@ To configure the backend check out [config.js](config.js) first.
 1. create your own salt for the passwords
 1. set the url of the frontend to prevent cors issues
 
-## user data
+## User accounts
 
 to get started create some user accounts with the cli-tool like so:
 ```bash
@@ -28,7 +28,7 @@ To set a custom avatar for the user
 $ node haushalt-cli.js setavatar demouser demo-user.jpg
 ```
 
-1. to get started 
+Then place the corresponding file in the `public/` folder.
 
 # Run it
 npm install
