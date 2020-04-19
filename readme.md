@@ -3,8 +3,9 @@
 # Requirements
 
 * node.js
-* mongodb
+* mongodb `docker-compose -f docker-compose-dev.yml up -d`
 
 # Run it
-npm install
-npm start
+
+    npm install
+    npm start
