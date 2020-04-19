@@ -50,7 +50,7 @@ program
                     date: new Date().setHours(new Date().getHours() -2 * i),
                     value: (Math.random()*100).toFixed(2),
                     remunerator: ["Bert","Joan","Bob"][Math.floor(Math.random() * 3)],
-                    category:["Sushi","Car","Baby","House"][Math.floor(Math.random() * 4)],
+                    category:["Lebensmittel","Apotheke","Benzin","BVG"][Math.floor(Math.random() * 4)],
                     info:["","Others have content","Some of these are empty on purpose"][Math.floor(Math.random() * 3)],
                     changed:new Date(),
                     dummy:true});
@@ -60,10 +60,10 @@ program
             var target = new Model.TargetModel({
                 tid:new Date().getFullYear()*12 + new Date().getMonth(),
                 totals:[
-                    {category:"Sushi",value:120},
-                    {category:"Car",value:220},
-                    {category:"Baby",value:420},
-                    {category:"House",value:1200},
+                    {category:"Lebensmittel",value:120},
+                    {category:"Apotheke",value:220},
+                    {category:"Benzin",value:420},
+                    {category:"BVG",value:1200},
                 ]
             })
             await target.save();
