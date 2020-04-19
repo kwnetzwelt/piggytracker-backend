@@ -3,7 +3,7 @@
 # Requirements
 
 * node.js
-* mongodb
+* mongodb `docker-compose -f docker-compose-dev.yml up -d`
 
 # Configure it
 
@@ -31,6 +31,6 @@ $ node haushalt-cli.js setavatar demouser demo-user.jpg
 Then place the corresponding file in the `public/` folder.
 
 # Run it
-npm install
-npm start
 
+    npm install
+    npm start
