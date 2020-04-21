@@ -1,6 +1,6 @@
 import passport from 'passport';
 import express from 'express';
-import entrycontroller from './entry';
+import entrycontroller from './controller';
 
 export default express.Router()
     .post('/', passport.authenticate('jwt', { session: false }), entrycontroller.create)
