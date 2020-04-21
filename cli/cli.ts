@@ -26,7 +26,7 @@ program
 
 program
     .command('createuser <username>')
-    .description("create user ")
+    .description("create user")
     .action(async (username) => {
         const existing_user = await UserService.findByName(username);
         if (existing_user) {
@@ -39,6 +39,15 @@ program
             const user = new User({ "username": username, "fullname": fullname, "password": newpassword });
             await user.save();
         }
+        await mongoose.done();
+    });
+
+program
+    .command('deleteuser <username>')
+    .description("delete user")
+    .action(async (username) => {
+        await UserService.deleteByName(username);
+        L.info(`User ${username} deleted.`);
         await mongoose.done();
     });
 
