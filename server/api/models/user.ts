@@ -8,7 +8,7 @@ export interface IUserModel extends mongoose.Document {
   username: string;
   fullname: string;
   password: string;
-  avatarUrl: string;
+  avatarUrl?: string;
 };
 
 const schema = new Schema({
