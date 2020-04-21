@@ -17,18 +17,53 @@ produces:
 
 
 definitions:
-  EntryBody:
+  EntryItem:
     type: object
     title: entry
-    required:
-      - value
     properties:
+      date:
+        type: string
+        format: date
       value:
         type: number
-        example: 17
+        format: float
+        example: 147.87
+        minimum: 0
+      remunerator:
+        type: string
+        example: "Jane Doe"
       category:
         type: string
         example: car
+      info:
+        type: string
+        example: "new wheels"
+  AddEntryBody:
+    type: object
+    title: entry
+    required:
+      - date
+      - value
+      - renumerator
+      - category
+    properties:
+      date:
+        type: string
+        format: date
+      value:
+        type: number
+        format: float
+        example: 147.87
+        minimum: 0
+      remunerator:
+        type: string
+        example: "Jane Doe"
+      category:
+        type: string
+        example: car
+      info:
+        type: string
+        example: "new wheels"
   ExampleBody:
     type: object
     title: example
@@ -45,7 +80,11 @@ paths:
       description: Get all bills
       responses:
         200:
-          description: bla
+          description: Success
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/EntryItem"
     post:
       description: Add a bill
       parameters:
@@ -54,7 +93,7 @@ paths:
           description: an entry
           required: true
           schema: 
-            $ref: "#/definitions/EntryBody"
+            $ref: "#/definitions/AddEntryBody"
       responses:
         200:
           description: created
