@@ -64,6 +64,28 @@ definitions:
       info:
         type: string
         example: "new wheels"
+  LoginBody:
+    type: object
+    title: login credentials
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+  LoginSuccessfulResponse:
+    type: object
+    title: Login was successful
+    properties:
+      message:
+        type: string
+        example: ok
+      token:
+        type: string
+      userprofile:
+        type: object
   ExampleBody:
     type: object
     title: example
@@ -172,6 +194,26 @@ paths:
           description: Delete the example with the specified id
         404:
           description: Example not found
+
+  /login:
+    post:
+      tags:
+        - authentication
+      description: Login with credentials
+      parameters:
+        - name: credentials
+          in: body
+          description: user credentials
+          required: true
+          schema: 
+            $ref: '#/definitions/LoginBody'
+      responses:
+        200:
+          description: login successful
+          schema:
+            $ref: '#/definitions/LoginSuccessfulResponse'
+        401:
+          description: login failed
 
   /spec:
     get:

@@ -1,5 +1,6 @@
 import { createHmac } from 'crypto';
 import mongoose from 'mongoose';
+import { Profile } from 'passport';
 
 const Schema = mongoose.Schema;
 
@@ -24,4 +25,11 @@ export function hashPassword(password: string) {
     .update(password)
     .digest('hex');
   return hash.trim();
+}
+
+export function toProfile(user: IUserModel) {
+  return {
+    fullname: user.fullname,
+    username: user.username
+  }
 }
