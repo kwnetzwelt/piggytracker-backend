@@ -4,6 +4,7 @@ const BodyParser = require("body-parser");
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const passport = require("passport");
+const crypto = require("crypto");
 
 var passportJWT = require("passport-jwt");
 
@@ -227,6 +228,55 @@ app.get("/targets",passport.authenticate('jwt', { session: false }), async (requ
     try {
         var result = await Model.TargetModel.find().lean().exec();
         response.send({data:result});
+    }catch(error) {
+        response.status(500).send(error);
+    }
+});
+
+app.delete("/invite",passport.authenticate('jwt', { session: false }), async (request, response) => {
+    try {
+        request.user.groupId = "";
+        request.user.groupName = "";
+        await request.user.save();
+        response.send(request.user);
+    
+    }catch(error)
+    {
+        response.status(500).send(error);
+    }
+});
+
+app.post("/invite",passport.authenticate('jwt', { session: false }), async (request, response) => {
+    try {
+        var invite = await Model.InviteMode.findOne({code:request.body.code});
+        if(invite.expires < new Date())
+        {
+            var invitingUser = await Model.UserModel.findById(invite.fromUser._id);
+            
+            request.user.groupId = invite.fromUser._id;
+            request.user.groupName = invitingUser.fullname;
+            await request.user.save();
+            response.send(request.user);
+        }else
+        {
+            response.status(500).send("Expired");
+        }
+        
+    }catch(error)
+    {
+        response.status(500).send(error);
+    }
+
+});
+app.get("/invite",passport.authenticate('jwt', { session: false }), async (request, response) => {
+    try {
+        console.log(JSON.stringify(request.user));
+        var invite = new Model.InviteMode();
+        invite.expires = new Date() + (2 * 60 * 60 * 1000);
+        invite.fromUser = request.user;
+        invite.code = crypto.randomBytes(5).toString('hex').substr(0,9);
+        await invite.save();
+        response.send(invite);
     }catch(error) {
         response.status(500).send(error);
     }

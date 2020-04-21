@@ -23,7 +23,9 @@ module.exports = {
         username:String,
         fullname:String,
         password:String,
-        avatarUrl:String
+        avatarUrl:String,
+        groupId:String,
+        groupName:String
     }), 
 
     BillModel : Mongoose.model("bill",{
@@ -39,5 +41,10 @@ module.exports = {
     TargetModel : Mongoose.model("target",{
         totals:Array, // objects: {category:CATEGORYNAME,value:VALUE}
         tid:{type:Number, unique:true}
+    }),
+    InviteMode: Mongoose.model("invite", {
+        expires: Date,
+        fromUser:{type:Mongoose.SchemaTypes.ObjectId, ref:"UserModel"},
+        code:String
     })
 }
