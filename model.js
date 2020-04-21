@@ -1,7 +1,7 @@
 
 const Mongoose = require("mongoose");
 const Crypto = require("crypto");
-const Config = require("./Config");
+const Config = require("./config");
 
 module.exports = {
     connect : (dbUrl) => {
