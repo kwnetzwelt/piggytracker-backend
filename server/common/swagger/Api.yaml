@@ -15,8 +15,35 @@ consumes:
 produces:
   - application/json
 
-
 definitions:
+  PaginatedEntries:
+    type: object
+    title: paginated entries
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/EntryItem"
+      page:
+        type: number
+        format: integer
+        description: page contained in the answer
+      total:
+        type: number
+        format: integer
+        description: Total amount of entries 
+  TargetTotalItem:
+    type: object
+    title: TargetTotalItem
+    properties:
+      category:
+        type: string
+        description: The name of the category
+        example: "car"
+      value:
+        type: number
+        format: digit
+        description: The amount that is targeted in this category
   EntryItem:
     type: object
     title: entry
@@ -38,7 +65,79 @@ definitions:
       info:
         type: string
         example: "new wheels"
-  AddEntryBody:
+      dummy:
+        type: boolean
+        default: false
+        example: false
+  InviteDetails:
+    type: object
+    title: an invite object
+    required:
+      - expires
+      - fromUser
+      - code
+    properties:
+      expires:
+        type: string
+        format: date-time
+      fromUser:
+        type: string
+      code:
+        type: string
+      
+  TargetsResult:
+    type: object
+    title: target colleciton
+    required:
+      - data
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/AddTargetResult"
+  AddTargetResult:
+    type: object
+    title: target
+    required:
+      - totals
+      - tid
+      - fromUser
+    properties:
+      _id:
+        type: string
+        format: id
+      totals:
+        type: array
+        items:
+          $ref: "#/definitions/TargetTotalItem"
+      fromUser:
+        type: string
+      tid:
+        type: number
+        description: Target Identifier 
+  AddTargetBody:
+    type: object
+    title: target
+    properties:
+      date:
+        type: string
+        format: date
+      value:
+        type: number
+        format: float
+        example: 147.87
+        minimum: 0
+        default: 0
+      remunerator:
+        type: string
+        example: "Jane Doe"
+      category:
+        type: string
+        example: car
+      info:
+        type: string
+        example: "new wheels"
+  AddEntryResult:
     type: object
     title: entry
     required:
@@ -46,7 +145,11 @@ definitions:
       - value
       - renumerator
       - category
+      - info
     properties:
+      _id:
+        type: string
+        format: id
       date:
         type: string
         format: date
@@ -64,6 +167,39 @@ definitions:
       info:
         type: string
         example: "new wheels"
+      dummy:
+        type: boolean
+        default: false
+        example: false
+  AddEntryBody:
+    type: object
+    title: entry
+    properties:
+      date:
+        type: string
+        format: date
+      value:
+        type: number
+        format: float
+        example: 147.87
+        minimum: 0
+        default: 0
+      remunerator:
+        type: string
+        example: "Jane Doe"
+      category:
+        type: string
+        example: car
+      info:
+        type: string
+        example: "new wheels"
+  ConsumeInviteBody:
+    type: object
+    title: invite
+    properties:
+      code:
+        type: string
+        default: "abdefghhj"
   LoginBody:
     type: object
     title: login credentials
@@ -112,18 +248,89 @@ definitions:
         example: no_stress
 
 paths:
-  /bill:
+  /bills:
     get:
+      tags:
+        - Authenticated
       description: Get all bills
+      parameters:
+        - name: perPage
+          in: query
+          description: provide pagination options of how many entries should be returned per page
+          required: true
+          type: "number"
+        - name: page
+          in: query
+          description: provide pagination options of the page number, that should be returned
+          required: true
+          type: "number"
       responses:
         200:
           description: Success
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/EntryItem"
+            $ref: "#/definitions/PaginatedEntries"
+  /bill/{id}:
+    delete:
+      description: Delete an entry. 
+      tags:
+        - Authenticated
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: document id of this entry
+      responses:
+        200:
+          description: The deleted entry
+          schema:
+            $ref: "#/definitions/AddEntryResult"
+        500:
+          description: Internal Server Error
+    get:
+      description: Returns the contents of an entry. 
+      tags:
+        - Authenticated
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: document id of this entry
+      responses:
+        200:
+          description: The requested entry
+          schema:
+            $ref: "#/definitions/AddEntryResult"
+        500:
+          description: Internal Server Error
+    put:
+      description: Updates the contents of an entry. 
+      tags:
+        - Authenticated
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: Entry id of this entry
+        - name: data
+          in: body
+          schema: 
+            $ref: "#/definitions/AddEntryResult"
+      responses:
+        200:
+          description: The updated entry
+          schema:
+            $ref: "#/definitions/AddEntryResult"
+        500:
+          description: Internal Server Error
+          
+  /bill:
     post:
       description: Add a bill
+      tags:
+        - Authenticated
       parameters:
         - name: entry
           in: body
@@ -134,86 +341,138 @@ paths:
       responses:
         200:
           description: created
-  /examples:
-    get:
-      tags:
-        - Examples
-      description: Fetch all examples
-      responses:
-        200:
-          description: Returns all examples
+          schema:
+            $ref: "#/definitions/AddEntryResult"
+  /target:
     post:
+      description: Add a target
       tags:
-        - Examples
-      description: Create a new example
+        - Authenticated
       parameters:
-        - name: example
+        - name: entry
           in: body
-          description: an example
+          description: a new target entry
           required: true
           schema: 
-            $ref: "#/definitions/ExampleBody"
+            $ref: "#/definitions/AddTargetBody"
       responses:
         200:
-          description: Returns newly created example
-
-  /examples/{id}:
+          description: created
+          schema:
+            $ref: "#/definitions/AddTargetResult"
+  /targets:
     get:
       tags:
-        - Examples
-      description: Get an example
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The id of the example to retrieve
-          type: string
+        - Authenticated
+      description: Get all targets
       responses:
         200:
-          description: Return the example with the specified id
-        404:
-          description: Example not found
-    patch:
-      tags:
-        - Examples
-      description: Update an example
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The id of the example to update
-          type: string
-        - name: example
-          in: body
-          description: example attribtues to update
-          required: true
-          schema: 
-            $ref: "#/definitions/ExampleBody"
-      responses:
-        200:
-          description: Return updated examples
-        404:
-          description: Example not found
+          description: Success
+          schema:
+            $ref: "#/definitions/TargetsResult"
+  /target/{id}:
     delete:
+      description: Delete a target. 
       tags:
-        - Examples
-      description: Delete an example
+        - Authenticated
       parameters:
         - name: id
+          type: string
           in: path
           required: true
-          description: The id of the example to delete
-          type: string
+          description: document id of this target
       responses:
-        204:
-          description: Delete the example with the specified id
-        404:
-          description: Example not found
+        200:
+          description: The deleted target
+          schema:
+            $ref: "#/definitions/AddTargetResult"
+        500:
+          description: Internal Server Error
+    get:
+      description: Returns the contents of a target. 
+      tags:
+        - Authenticated
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: document id of this target
+      responses:
+        200:
+          description: The requested target
+          schema:
+            $ref: "#/definitions/AddTargetResult"
+        500:
+          description: Internal Server Error
+    put:
+      description: Updates the contents of a target. 
+      tags:
+        - Authenticated
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: Entry id of this target
+        - name: data
+          in: body
+          schema: 
+            $ref: "#/definitions/AddTargetResult"
+      responses:
+        200:
+          description: The updated target
+          schema:
+            $ref: "#/definitions/AddTargetResult"
+        500:
+          description: Internal Server Error
 
+  /invite:
+    get:
+      description: Returns an invite code. Valid for 2 hours. Can be consumed by one user. 
+      tags:
+        - Authenticated
+      responses:
+        200:
+          description: The requested target
+          schema:
+            $ref: "#/definitions/InviteDetails"
+        500:
+          description: Internal Server Error
+    delete:
+      description: Deletes group invite (membership in this case) on the currently logged in user
+      tags:
+        - Authenticated
+      responses:
+        200:
+          description: Returns updated user details
+          schema:
+            $ref: "#/definitions/UserDetails"
+        500:
+          description: Internal Server Error
+    post:
+      description: Consumes an invite
+      tags:
+        - Authenticated
+      parameters:
+        - name: code
+          in: body
+          required: true
+          description: InviteCode
+          schema: 
+            $ref: "#/definitions/ConsumeInviteBody"
+      responses:
+        200:
+          description: updated user details
+          schema:
+            $ref: "#/definitions/UserDetails"
+        500:
+          description: Internal Server Error (e.g. expired invite code)
+          
   /login:
     get:
       tags:
-        - authentication
+        - Authenticated
       description: Get user details
       responses:
         200:
@@ -241,7 +500,7 @@ paths:
   /logout:
     post:
       tags:
-        - authentication
+        - Authenticated
       description: Logout with credentials
       responses:
         200:
