@@ -1,12 +1,14 @@
 swagger: "2.0"
 info:
   version: 1.0.0
-  title: myapp
-  description: My cool Mongoose, Typescript, Express app
+  title: Piggi
+  description: Piggi Frontend API
 basePath: /api/v1
 tags:
-  - name: Examples
-    description: Simple example endpoints
+  - name: Authenticated
+    description: Available when logged in with valid jwt token
+  - name: Authentication
+    description: Available without a valid jwt token
   - name: Specification
     description: The swagger API specification
 
@@ -237,15 +239,6 @@ definitions:
       message:
         type: string
         example: ok
-  ExampleBody:
-    type: object
-    title: example
-    required:
-      - name
-    properties:
-      name:
-        type: string
-        example: no_stress
 
 paths:
   /bills:
@@ -481,7 +474,7 @@ paths:
             $ref: '#/definitions/UserDetails'
     post:
       tags:
-        - authentication
+        - Authentication
       description: Login with credentials
       parameters:
         - name: credentials
