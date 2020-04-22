@@ -7,6 +7,16 @@ module.exports = {
     connect : (dbUrl) => {
         Mongoose.connect(dbUrl,{ useNewUrlParser: true });
     },
+    /**
+     * @param {UserModel} user
+     */
+    getUserGroup:(user) => {
+        if(user.groupId && user.groupId.length > 0)
+        {
+            return user.groupId;
+        }
+        return user._id.toString();
+    },
     hashPassword : (password) => {
         const hash = Crypto.createHmac('sha256', Config.pwd_salt)
             .update(password)
@@ -35,12 +45,14 @@ module.exports = {
         category:String,
         info:String,
         changed:Date,
-        dummy:Boolean
+        dummy:Boolean,
+        fromUser:String
     }),
 
     TargetModel : Mongoose.model("target",{
         totals:Array, // objects: {category:CATEGORYNAME,value:VALUE}
-        tid:{type:Number, unique:true}
+        tid:{type:Number, unique:true},
+        fromUser:String
     }),
     InviteMode: Mongoose.model("invite", {
         expires: Date,

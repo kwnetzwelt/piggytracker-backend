@@ -125,6 +125,7 @@ app.post("/bill",passport.authenticate('jwt', { session: false }), async (reques
     try {
         var bill = new Model.BillModel(request.body);
         bill.changed = new Date();
+        bill.fromUser = Model.getUserGroup(request.user);
         var result = await bill.save();
         response.send(result);
     }catch(error) {
@@ -134,7 +135,7 @@ app.post("/bill",passport.authenticate('jwt', { session: false }), async (reques
 
 app.get("/bill/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var bill = await Model.BillModel.findById(request.params.id).exec();
+        var bill = await Model.BillModel.find({fromUser:Model.getUserGroup(request.user),_id:request.params.id}).exec();
         response.send(bill);
     } catch (error) {
         response.status(500).send(error);
@@ -143,7 +144,7 @@ app.get("/bill/:id",passport.authenticate('jwt', { session: false }), async (req
 
 app.put("/bill/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var bill = await Model.BillModel.findById(request.params.id).exec();
+        var bill = await Model.BillModel.find({fromUser:Model.getUserGroup(request.user),_id:request.params.id}).exec();
         bill.set(request.body);
         bill.changed = new Date();
         var result = await bill.save();
@@ -155,7 +156,7 @@ app.put("/bill/:id",passport.authenticate('jwt', { session: false }), async (req
 
 app.delete("/bill/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var result = await Model.BillModel.deleteOne({ _id: request.params.id }).exec();
+        var result = await Model.BillModel.deleteOne({fromUser:Model.getUserGroup(request.user), _id: request.params.id }).exec();
         response.send(result);
     } catch (error) {
         response.status(500).send(error);
@@ -168,7 +169,7 @@ app.get("/bills",passport.authenticate('jwt', { session: false }), async (reques
         var perPage = Math.max(0,Math.min(5000,parseInt( request.query.perPage)));
         var page = Math.max(0,parseInt(request.query.page));
         console.log(perPage + " " + page)
-        var result = await Model.BillModel.find().sort([["date",-1]]).skip((page-1) * perPage).limit(perPage).lean().exec();
+        var result = await Model.BillModel.find({fromUser:Model.getUserGroup(request.user)}).sort([["date",-1]]).skip((page-1) * perPage).limit(perPage).lean().exec();
         var countResult = await Model.BillModel.count();
         response.send({data:result,page:page,total:countResult});
     }catch(error) {
@@ -180,7 +181,8 @@ app.get("/bills",passport.authenticate('jwt', { session: false }), async (reques
 app.post("/target",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
         var target = new Model.TargetModel(request.body);
-        var anyInStore = await Model.TargetModel.findOne({tid:target.tid});
+        target.fromUser = Model.getUserGroup(request.user);
+        var anyInStore = await Model.TargetModel.findOne({tid:target.tid,fromUser:Model.getUserGroup(request.user)});
         if(anyInStore)
         {
             response.status(500).send("already a Target with this tid. ");
@@ -196,7 +198,7 @@ app.post("/target",passport.authenticate('jwt', { session: false }), async (requ
 
 app.get("/target/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var target = await Model.TargetModel.findById(request.params.id).exec();
+        var target = await Model.TargetModel.find({fromUser:Model.getUserGroup(request.user), _id:request.params.id}).exec();
         response.send(target);
     } catch (error) {
         response.status(500).send(error);
@@ -205,7 +207,7 @@ app.get("/target/:id",passport.authenticate('jwt', { session: false }), async (r
 
 app.put("/target/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var target = await Model.TargetModel.findById(request.params.id).exec();
+        var target = await Model.TargetModel.find({fromUser:Model.getUserGroup(request.user), _id:request.params.id}).exec();
         target.set(request.body);
         var result = await target.save();
         response.send(result);
@@ -217,7 +219,7 @@ app.put("/target/:id",passport.authenticate('jwt', { session: false }), async (r
 
 app.delete("/target/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var result = await Model.TargetModel.deleteOne({ _id: request.params.id }).exec();
+        var result = await Model.TargetModel.deleteOne({fromUser:Model.getUserGroup(request.user), _id: request.params.id }).exec();
         response.send(result);
     } catch (error) {
         response.status(500).send(error);
@@ -226,7 +228,8 @@ app.delete("/target/:id",passport.authenticate('jwt', { session: false }), async
 
 app.get("/targets",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var result = await Model.TargetModel.find().lean().exec();
+
+        var result = await Model.TargetModel.find({fromUser:Model.getUserGroup(request.user)}).lean().exec();
         response.send({data:result});
     }catch(error) {
         response.status(500).send(error);
@@ -246,6 +249,9 @@ app.delete("/invite",passport.authenticate('jwt', { session: false }), async (re
     }
 });
 
+/**
+ * Consume an invite (Accept)
+ */
 app.post("/invite",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
         var invite = await Model.InviteMode.findOne({code:request.body.code});
@@ -256,6 +262,7 @@ app.post("/invite",passport.authenticate('jwt', { session: false }), async (requ
             request.user.groupId = invite.fromUser._id;
             request.user.groupName = invitingUser.fullname;
             await request.user.save();
+            await invite.remove();
             response.send(request.user);
         }else
         {
