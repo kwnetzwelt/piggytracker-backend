@@ -86,6 +86,21 @@ definitions:
         type: string
       userprofile:
         type: object
+  UserDetails:
+    type: object
+    title: Details of the current user
+    properties:
+      username:
+        type: string
+      fullname:
+        type: string
+  MessageResponse:
+    type: object
+    title: A simple message
+    properties:
+      message:
+        type: string
+        example: ok
   ExampleBody:
     type: object
     title: example
@@ -196,6 +211,15 @@ paths:
           description: Example not found
 
   /login:
+    get:
+      tags:
+        - authentication
+      description: Get user details
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/UserDetails'
     post:
       tags:
         - authentication
@@ -212,6 +236,18 @@ paths:
           description: login successful
           schema:
             $ref: '#/definitions/LoginSuccessfulResponse'
+        401:
+          description: login failed
+  /logout:
+    post:
+      tags:
+        - authentication
+      description: Logout with credentials
+      responses:
+        200:
+          description: login successful
+          schema:
+            $ref: '#/definitions/MessageResponse'
         401:
           description: login failed
 

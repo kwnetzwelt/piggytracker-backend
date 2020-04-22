@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as HttpStatus from 'http-status-codes';
 import UserService from '../../services/user.service';
-import { hashPassword, User, toProfile } from '../../../api/models/user';
+import { hashPassword, User, toProfile, IUserModel } from '../../../api/models/user';
 import { sign } from 'jsonwebtoken';
 
 export class Controller {
@@ -24,6 +24,19 @@ export class Controller {
         }
     }
 
+    async userinfo(request: Request, response: Response) {
+        var user = request.user as IUserModel;
+        user['password'] = "";
+        response.send({
+            username: user.username,
+            fullname: user.fullname,
+        });
+    }
+
+    async logout(request: Request, response: Response) {
+        await request.logout();
+        response.send({ "message": "ok" });
+    }
 }
 
 export default new Controller();
