@@ -3,53 +3,19 @@ import { expect } from 'chai';
 import request from 'supertest';
 import Server from '../server';
 import * as HttpStatus from 'http-status-codes';
-import { User, IUserModel } from '../server/api/models/user';
-import Mongoose from '../server/common/mongoose';
-import mongoose from 'mongoose';
+import { IUserModel } from '../server/api/models/user';
 import { UserBuilder } from './user.builder';
+import { initDatabase, dropDatabase, createUser, loginUser } from './controller.utils';
 
-interface RunData {
-    user: IUserModel,
-    password: string,
-    token?: string
-}
 
 describe('Auth', () => {
-    let db: Mongoose;
     before(async () => {
-        const d = new Date();
-        process.env.MONGO_DB = `unittest-${d.getTime()}`;
-        db = new Mongoose();
-        db.init();
+        await initDatabase();
     });
 
     after(async () => {
-        await mongoose.connection.db.dropDatabase();
+        await dropDatabase();
     });
-
-    function createUser(): RunData {
-        let password: string;
-        const testuser = UserBuilder.default(p => password = p);
-        testuser.save();
-        return {
-            user: testuser,
-            password: password
-        };
-    }
-
-    async function loginUser(rundata: RunData) {
-        await request(Server)
-            .post('/api/v1/login')
-            .send({ username: rundata.user.username, password: rundata.password })
-            .expect(HttpStatus.OK)
-            .expect('Content-Type', /json/)
-            .then(r => {
-                expect(r.body)
-                    .to.be.an('object')
-                    .that.has.property('token');
-                rundata.token = r.body.token;
-            })
-    }
 
     it('should reject wrong password', async () => {
         let password: string;
@@ -105,7 +71,7 @@ describe('Auth', () => {
     });
 
     it('should send user details after login', async () => {
-        const rundata = createUser();
+        const rundata = await createUser();
         await loginUser(rundata);
 
         return request(Server)
@@ -125,7 +91,7 @@ describe('Auth', () => {
     });
 
     it('should repond with 401 when not authorized', async () => {
-        const rundata = createUser();
+        const rundata = await createUser();
         await loginUser(rundata);
 
         return request(Server)

@@ -13,13 +13,33 @@ export interface IEntryModel extends mongoose.Document {
 };
 
 const schema = new Schema({
-  date: Date,
-  value: Number,
-  remunerator: String,
-  category: String,
-  info: String,
-  changed: Date,
+  date: {
+    type: Date,
+    // `Date.now()` returns the current unix timestamp as a number
+    default: Date.now
+  },
+  value: {
+    type: Number,
+    default: 0
+  },
+  remunerator: {
+    type: String,
+    default: ""
+  },
+  category: {
+    type: String,
+    default: ""
+  },
+  info: {
+    type: String,
+    default: ""
+  },
+  changed: {
+    type: Date,
+    // `Date.now()` returns the current unix timestamp as a number
+    default: Date.now
+  },
   dummy: Boolean
-});
+}, { timestamps: true });
 
 export const Entry = mongoose.model<IEntryModel>("bill", schema);

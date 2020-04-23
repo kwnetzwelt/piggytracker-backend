@@ -328,7 +328,7 @@ paths:
         - name: entry
           in: body
           description: an entry
-          required: true
+          required: false
           schema: 
             $ref: "#/definitions/AddEntryBody"
       responses:

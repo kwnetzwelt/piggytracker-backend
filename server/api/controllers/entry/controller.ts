@@ -27,7 +27,7 @@ export class Controller {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       const doc = await EntryService.create(req.body);
-      return res.status(HttpStatus.CREATED).location(`/api/v1/examples/${doc._id}`).json(doc);
+      return res.status(HttpStatus.OK).json(doc);
     }
     catch (err) {
       return next(err);

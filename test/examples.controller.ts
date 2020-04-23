@@ -8,7 +8,7 @@ import { doesNotReject } from 'assert';
 let exampleId = null;
 
 describe('Examples', () => {
-  it('should add a new example', () =>
+  xit('should add a new example', () =>
     request(Server)
       .post('/api/v1/examples')
       .send({ name: 'test1' })
@@ -22,7 +22,7 @@ describe('Examples', () => {
           .to.equal('test1');
       }));
 
-  it('should add another new example', () =>
+  xit('should add another new example', () =>
     request(Server)
       .post('/api/v1/examples')
       .send({ name: 'test2' })
@@ -35,7 +35,7 @@ describe('Examples', () => {
           .to.equal('test2');
       }));
 
-  it('should get all examples', () =>
+  xit('should get all examples', () =>
     request(Server)
       .get('/api/v1/examples')
       .expect(HttpStatus.OK)
@@ -46,7 +46,7 @@ describe('Examples', () => {
           .of.lengthOf.greaterThan(1);
       }));
 
-  it('should get an example by id', () =>
+  xit('should get an example by id', () =>
     request(Server)
       .get(`/api/v1/examples/${exampleId}`)
       .expect(HttpStatus.OK)
@@ -58,7 +58,7 @@ describe('Examples', () => {
           .equal('test1');
       }));
 
-  it('should update an example', () =>
+  xit('should update an example', () =>
     request(Server)
       .patch(`/api/v1/examples/${exampleId}`)
       .send({ name: 'test1-updated' })
@@ -71,7 +71,7 @@ describe('Examples', () => {
           .equal('test1-updated');
       }));
 
-  it('should remove an example', () =>
+  xit('should remove an example', () =>
     request(Server)
       .delete(`/api/v1/examples/${exampleId}`)
       .expect(HttpStatus.NO_CONTENT)
