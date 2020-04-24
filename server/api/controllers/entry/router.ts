@@ -5,6 +5,6 @@ import entrycontroller from './controller';
 export default express.Router()
     .post('/', passport.authenticate('jwt', { session: false }), entrycontroller.create)
     .get('/', entrycontroller.all)
-    .get('/:id', entrycontroller.byId)
+    .get('/:id', passport.authenticate('jwt', { session: false }), entrycontroller.byId)
     .put('/:id', entrycontroller.patch)
     .delete('/:id', entrycontroller.remove);

@@ -18,7 +18,7 @@ export class EntrysService {
     return docs;
   }
 
-  async byId(id: string): Promise<IEntryModel> {
+  async byId(id: string, fromUser: string): Promise<IEntryModel> {
     L.info(`fetch Entry with id ${id}`);
 
     if (!mongooseTypes.ObjectId.isValid(id)) {
@@ -26,7 +26,7 @@ export class EntrysService {
     }
 
     const doc = await Entry
-      .findOne({ _id: id })
+      .findOne({ _id: id, fromUser })
       .lean()
       .exec() as IEntryModel;
 

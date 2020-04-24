@@ -30,7 +30,7 @@ export class Controller {
 
   async byId(req: Request, res: Response, next: NextFunction) {
     try {
-      const doc = await EntryService.byId(req.params.id);
+      const doc = await EntryService.byId(req.params.id, (req.user as UserProfile).group);
       return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc));
     }
     catch (err) {

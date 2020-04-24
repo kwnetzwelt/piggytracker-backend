@@ -9,8 +9,8 @@ export interface IUserModel extends mongoose.Document {
   fullname: string;
   password: string;
   avatarUrl?: string;
-  groupId?: String,
-  groupName?: String,
+  groupId?: string,
+  groupName?: string,
 };
 
 const schema = new Schema({
@@ -32,9 +32,9 @@ export function hashPassword(password: string) {
 }
 
 export interface UserProfile {
-  fullname: String,
-  username: String,
-  group: String,
+  fullname: string,
+  username: string,
+  group: string,
 }
 
 export function toProfile(user: IUserModel): UserProfile {

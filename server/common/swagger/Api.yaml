@@ -278,6 +278,8 @@ paths:
           description: The deleted entry
           schema:
             $ref: "#/definitions/AddEntryResult"
+        404:
+          description: The item does not exist or the authenticated user is not allowed to view it.
         500:
           description: Internal Server Error
     get:

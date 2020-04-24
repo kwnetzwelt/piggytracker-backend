@@ -17,7 +17,6 @@ describe('Entry', () => {
         await dropDatabase();
     });
 
-
     it('cannot be added when not authenticated', () => {
         return request(Server)
             .post('/api/v1/bill')
@@ -85,7 +84,7 @@ describe('Entry', () => {
 
     it('can be retrieved by id', async () => {
         const rundata = await loginUser();
-        const entry = EntryBuilder.default();
+        const entry = EntryBuilder.with().user(rundata).build();
         entry.save();
 
         return request(Server)
@@ -157,12 +156,29 @@ describe('Entry', () => {
                 entryId = r.body._id;
             });
 
-        const doc = await (new EntrysService().byId(entryId));
+        const doc = await (new EntrysService().byId(entryId, String(rundata.user._id)));
 
         expect(doc.fromUser).to.equal(String(rundata.user._id));
     });
-    xit('cannot be retrieved by id when user is not in group', () => {
-        // TODO
+
+    it('cannot be retrieved by id when user is not in group', async () => {
+        const rundata = await loginUser();
+
+        let entryId: string;
+        await request(Server)
+            .post('/api/v1/bill')
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send({})
+            .expect(HttpStatus.OK)
+            .then(r => {
+                entryId = r.body._id;
+            });
+
+        const otherlogin = await loginUser();
+        return request(Server)
+            .get(`/api/v1/bill/${entryId}`)
+            .set('Authorization', 'bearer ' + otherlogin.token)
+            .expect(HttpStatus.NOT_FOUND);
     });
 
 
