@@ -9,13 +9,17 @@ export interface IUserModel extends mongoose.Document {
   fullname: string;
   password: string;
   avatarUrl?: string;
+  groupId?: String,
+  groupName?: String,
 };
 
 const schema = new Schema({
-  username:String,
-  fullname:String,
-  password:String,
-  avatarUrl:String
+  username: String,
+  fullname: String,
+  password: String,
+  avatarUrl: String,
+  groupId: String,
+  groupName: String,
 });
 
 export const User = mongoose.model<IUserModel>("user", schema);
@@ -27,9 +31,16 @@ export function hashPassword(password: string) {
   return hash.trim();
 }
 
-export function toProfile(user: IUserModel) {
+export interface UserProfile {
+  fullname: String,
+  username: String,
+  group: String,
+}
+
+export function toProfile(user: IUserModel): UserProfile {
   return {
     fullname: user.fullname,
-    username: user.username
+    username: user.username,
+    group: (user.groupId && user.groupId.length > 0) ? user.groupId : String(user._id)
   }
 }

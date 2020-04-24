@@ -21,7 +21,9 @@ export class EntrysService {
   async byId(id: string): Promise<IEntryModel> {
     L.info(`fetch Entry with id ${id}`);
 
-    if (!mongooseTypes.ObjectId.isValid(id)) throw new errors.HttpError(HttpStatus.BAD_REQUEST);
+    if (!mongooseTypes.ObjectId.isValid(id)) {
+      throw new errors.HttpError(HttpStatus.BAD_REQUEST);
+    }
 
     const doc = await Entry
       .findOne({ _id: id })

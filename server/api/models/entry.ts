@@ -9,7 +9,8 @@ export interface IEntryModel extends mongoose.Document {
   category: string,
   info: string,
   changed: Date,
-  dummy: boolean
+  dummy: boolean,
+  fromUser: String,
 };
 
 const schema = new Schema({
@@ -39,7 +40,8 @@ const schema = new Schema({
     // `Date.now()` returns the current unix timestamp as a number
     default: Date.now
   },
-  dummy: Boolean
+  dummy: Boolean,
+  fromUser:String,
 }, { timestamps: true });
 
 export const Entry = mongoose.model<IEntryModel>("bill", schema);

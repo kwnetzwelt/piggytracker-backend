@@ -3,6 +3,7 @@ import { ExtractJwt, Strategy as JwtStrategy, StrategyOptions } from 'passport-j
 import userservice from '../api/services/user.service';
 import passport from 'passport';
 import L from '../common/logger'
+import { toProfile } from '../api/models/user';
 
 
 const jwtOptions: StrategyOptions = {
@@ -15,7 +16,7 @@ var strategy = new JwtStrategy(jwtOptions, async function (jwt_payload, next) {
     // usually this would be a database call:
     const user = await userservice.findById(jwt_payload.id);
     if (user) {
-        next(null, user);
+        next(null, toProfile(user));
     } else {
         next(null, false);
     }
