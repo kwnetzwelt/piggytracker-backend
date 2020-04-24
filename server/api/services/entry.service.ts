@@ -58,13 +58,17 @@ export class EntrysService {
     return doc;
   }
 
-  async remove(id: string): Promise<Pick<IEntryModel, "info" | "_id" | "date" | "value" | "remunerator" | "category" | "changed" | "dummy">> {
+  async remove(id: string, fromUser: string): Promise<Pick<IEntryModel, "info" | "_id" | "date" | "value" | "remunerator" | "category" | "changed" | "dummy">> {
     L.info(`delete Entry with id ${id}`);
 
-    return await Entry
-      .findOneAndRemove({ _id: id })
+    const doc = await Entry
+      .findOneAndRemove({ _id: id, fromUser })
       .lean()
-      .exec()
+      .exec();
+
+    if (!doc) throw new errors.HttpError(HttpStatus.NOT_FOUND);
+
+    return doc;
   }
 }
 

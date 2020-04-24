@@ -270,6 +270,8 @@ paths:
           description: The deleted entry
           schema:
             $ref: "#/definitions/AddEntryResult"
+        401:
+          description: Unauthorized.
         404:
           description: The item does not exist or the authenticated user is not allowed to view it.
         500:

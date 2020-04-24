@@ -7,4 +7,4 @@ export default express.Router()
     .get('/', entrycontroller.all)
     .get('/:id', passport.authenticate('jwt', { session: false }), entrycontroller.byId)
     .put('/:id', passport.authenticate('jwt', { session: false }), entrycontroller.patch)
-    .delete('/:id', entrycontroller.remove);
+    .delete('/:id', passport.authenticate('jwt', { session: false }), entrycontroller.remove);

@@ -76,8 +76,8 @@ export class Controller {
 
   async remove(req: Request, res: Response, next: NextFunction) {
     try {
-      const doc = await EntryService.remove(req.params.id);
-      return res.status(HttpStatus.NO_CONTENT).send();
+      const doc = await EntryService.remove(req.params.id, (req.user as UserProfile).group);
+      return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc as any));
     }
     catch (err) {
       return next(err);

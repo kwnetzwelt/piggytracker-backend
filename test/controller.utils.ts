@@ -12,6 +12,13 @@ export interface RunData {
     password: string,
     token?: string,
     entryId?: string,
+    entry?: {
+        date: string,
+        value: number,
+        remunerator: string,
+        category: string,
+        info: string,
+    }
 }
 
 export async function initDatabase() {

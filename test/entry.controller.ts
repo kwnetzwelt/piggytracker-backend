@@ -19,11 +19,19 @@ describe('Entry', () => {
 
     async function loginUserAndCreateEntry() {
         const rundata = await loginUser();
+        const entry = EntryBuilder.default();
+        rundata.entry = {
+            date: entry.date.toISOString().substring(0, 10),
+            value: entry.value,
+            remunerator: entry.remunerator,
+            category: entry.category,
+            info: entry.info,
+        };
 
         await request(Server)
             .post('/api/v1/bill')
             .set('Authorization', 'bearer ' + rundata.token)
-            .send({})
+            .send(rundata.entry)
             .expect(HttpStatus.OK)
             .then(r => {
                 rundata.entryId = r.body._id;
@@ -274,6 +282,62 @@ describe('Entry', () => {
             .put(`/api/v1/bill/${rundata.entryId}`)
             .set('Authorization', 'bearer ' + otherlogin.token)
             .send()
+            .expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('can be deleted', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        await request(Server)
+            .delete(`/api/v1/bill/${rundata.entryId}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK);
+    });
+
+    it('can be deleted and response contains its values', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        await request(Server)
+            .delete(`/api/v1/bill/${rundata.entryId}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK)
+            .expect('Content-Type', /json/)
+            .then(r => {
+                expect(r.body).to.have.property('_id').to.equal(rundata.entryId);
+                expect(r.body).to.have.property('date').to.equal(rundata.entry.date);
+                expect(r.body).to.have.property('value').to.equal(rundata.entry.value);
+                expect(r.body).to.have.property('remunerator').to.equal(rundata.entry.remunerator);
+                expect(r.body).to.have.property('category').to.equal(rundata.entry.category);
+                expect(r.body).to.have.property('info').to.equal(rundata.entry.info);
+                expect(r.body).to.not.have.property('fromUser');
+                expect(r.body).to.not.have.property('dummy');
+            });
+    });
+
+    it('cannot be retrieved after it has been deleted', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        await request(Server)
+            .delete(`/api/v1/bill/${rundata.entryId}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK);
+        return request(Server)
+            .get(`/api/v1/bill/${rundata.entryId}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('cannot be deleted without authorization', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        await request(Server)
+            .delete(`/api/v1/bill/${rundata.entryId}`)
+            .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('cannot be deleted by other user', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        const otherlogin = await loginUser();
+
+        await request(Server)
+            .delete(`/api/v1/bill/${rundata.entryId}`)
+            .set('Authorization', 'bearer ' + otherlogin.token)
             .expect(HttpStatus.NOT_FOUND);
     });
 });
