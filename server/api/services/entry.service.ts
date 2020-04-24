@@ -45,13 +45,15 @@ export class EntrysService {
     return doc;
   }
 
-  async patch(id: string, EntryData: IEntryModel): Promise<IEntryModel> {
+  async patch(id: string, fromUser: string, EntryData: IEntryModel): Promise<IEntryModel> {
     L.info(`update Entry with id ${id} with data ${EntryData}`);
 
     const doc = await Entry
-      .findOneAndUpdate({ _id: id }, { $set: EntryData }, { new: true })
+      .findOneAndUpdate({ _id: id, fromUser }, { $set: EntryData }, { new: true })
       .lean()
       .exec() as IEntryModel;
+
+    if (!doc) throw new errors.HttpError(HttpStatus.NOT_FOUND);
 
     return doc;
   }

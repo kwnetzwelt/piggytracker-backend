@@ -10,7 +10,8 @@ import Mongoose from '../server/common/mongoose';
 export interface RunData {
     user: IUserModel,
     password: string,
-    token?: string
+    token?: string,
+    entryId?: string,
 }
 
 export async function initDatabase() {

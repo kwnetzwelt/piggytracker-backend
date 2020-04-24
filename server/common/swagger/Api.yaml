@@ -67,10 +67,6 @@ definitions:
       info:
         type: string
         example: "new wheels"
-      dummy:
-        type: boolean
-        default: false
-        example: false
   InviteDetails:
     type: object
     title: an invite object
@@ -169,10 +165,6 @@ definitions:
       info:
         type: string
         example: "new wheels"
-      dummy:
-        type: boolean
-        default: false
-        example: false
   AddEntryBody:
     type: object
     title: entry
@@ -297,6 +289,12 @@ paths:
           description: The requested entry
           schema:
             $ref: "#/definitions/AddEntryResult"
+        400:
+          description: Malformed request.
+        401:
+          description: Unauthorized.
+        404:
+          description: The item does not exist or the authenticated user is not allowed to view it.
         500:
           description: Internal Server Error
     put:
@@ -312,12 +310,16 @@ paths:
         - name: data
           in: body
           schema: 
-            $ref: "#/definitions/AddEntryResult"
+            $ref: "#/definitions/AddEntryBody"
       responses:
         200:
           description: The updated entry
           schema:
             $ref: "#/definitions/AddEntryResult"
+        401:
+          description: Unauthorized.
+        404:
+          description: The item does not exist or the authenticated user is not allowed to view it.
         500:
           description: Internal Server Error
           

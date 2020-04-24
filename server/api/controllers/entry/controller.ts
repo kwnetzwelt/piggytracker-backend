@@ -9,13 +9,24 @@ export class Controller {
   private static toResponseBody(doc: IEntryModel) {
     return {
       _id: String(doc._id),
-      date: doc.date.toISOString().substring(0, 10),
+      date: doc.date?.toISOString().substring(0, 10),
       value: doc.value,
       remunerator: doc.remunerator,
       category: doc.category,
       info: doc.info,
-      dummy: doc.dummy,
     };
+  }
+
+  private static extractWriteableFieldsFromRequestBody(req: Request) {
+    const body = (req.body || {});
+    return {
+      date: body.date,
+      value: body.value,
+      remunerator: body.remunerator,
+      category: body.category,
+      info: body.info,
+      changed: new Date(),
+    } as IEntryModel;
   }
 
   async all(req: Request, res: Response, next: NextFunction) {
@@ -40,8 +51,7 @@ export class Controller {
 
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const fields = (req.body || {}) as IEntryModel;
-      fields.changed = new Date();
+      const fields = Controller.extractWriteableFieldsFromRequestBody(req);
       fields.fromUser = (req.user as UserProfile).group
 
       const doc = await EntryService.create(fields);
@@ -55,8 +65,9 @@ export class Controller {
 
   async patch(req: Request, res: Response, next: NextFunction) {
     try {
-      const doc = await EntryService.patch(req.params.id, req.body);
-      return res.status(HttpStatus.OK).location(`/api/v1/examples/${doc._id}`).json(doc);
+      const fields = Controller.extractWriteableFieldsFromRequestBody(req);
+      const doc = await EntryService.patch(req.params.id, (req.user as UserProfile).group, fields);
+      return res.status(HttpStatus.OK).location(`/api/v1/examples/${doc._id}`).json(Controller.toResponseBody(doc));
     }
     catch (err) {
       return next(err);
