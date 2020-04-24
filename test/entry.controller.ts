@@ -4,9 +4,10 @@ import request from 'supertest';
 import Server from '../server';
 import * as HttpStatus from 'http-status-codes';
 import { TestRandom } from './test.random';
-import { initDatabase, dropDatabase, loginUser } from './controller.utils';
+import { initDatabase, dropDatabase, loginUser, RunData } from './controller.utils';
 import { EntryBuilder } from './entry.builder';
 import { EntrysService } from '../server/api/services/entry.service';
+import { CreateOrUpdateModel, ResponseModel } from '../server/api/models/entry';
 
 describe('Entry', () => {
     before(async () => {
@@ -16,6 +17,19 @@ describe('Entry', () => {
     after(async () => {
         await dropDatabase();
     });
+
+    async function createEntry(rundata: RunData, entry: CreateOrUpdateModel) {
+        let entryId: string;
+        await request(Server)
+            .post('/api/v1/bills')
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send(entry)
+            .expect(HttpStatus.OK)
+            .then(r => {
+                entryId = r.body._id;
+            });
+        return entryId;
+    }
 
     async function loginUserAndCreateEntry() {
         const rundata = await loginUser();
@@ -27,22 +41,13 @@ describe('Entry', () => {
             category: entry.category,
             info: entry.info,
         };
-
-        await request(Server)
-            .post('/api/v1/bill')
-            .set('Authorization', 'bearer ' + rundata.token)
-            .send(rundata.entry)
-            .expect(HttpStatus.OK)
-            .then(r => {
-                rundata.entryId = r.body._id;
-            });
-
+        rundata.entryId = await createEntry(rundata, rundata.entry);
         return rundata;
     }
 
     it('cannot be added when not authenticated', () => {
         return request(Server)
-            .post('/api/v1/bill')
+            .post('/api/v1/bills')
             .send({
                 date: new Date().toISOString().substring(0, 10),
                 value: 17,
@@ -57,7 +62,7 @@ describe('Entry', () => {
         const rundata = await loginUser();
 
         return request(Server)
-            .post('/api/v1/bill')
+            .post('/api/v1/bills')
             .set('Authorization', 'bearer ' + rundata.token)
             .send({})
             .expect(HttpStatus.OK)
@@ -83,7 +88,7 @@ describe('Entry', () => {
         };
 
         return request(Server)
-            .post('/api/v1/bill')
+            .post('/api/v1/bills')
             .set('Authorization', 'bearer ' + rundata.token)
             .send(entry)
             .expect(HttpStatus.OK)
@@ -112,7 +117,7 @@ describe('Entry', () => {
         entry.save();
 
         return request(Server)
-            .get(`/api/v1/bill/${entry._id}`)
+            .get(`/api/v1/bills/${entry._id}`)
             .set('Authorization', 'bearer ' + rundata.token)
             .expect(HttpStatus.OK)
             .expect('Content-Type', /json/)
@@ -141,7 +146,7 @@ describe('Entry', () => {
 
         let entryId: string;
         await request(Server)
-            .post('/api/v1/bill')
+            .post('/api/v1/bills')
             .set('Authorization', 'bearer ' + rundata.token)
             .send(entry)
             .expect(HttpStatus.OK)
@@ -150,7 +155,7 @@ describe('Entry', () => {
             });
 
         return request(Server)
-            .get(`/api/v1/bill/${entryId}`)
+            .get(`/api/v1/bills/${entryId}`)
             .set('Authorization', 'bearer ' + rundata.token)
             .expect(HttpStatus.OK)
             .expect('Content-Type', /json/)
@@ -170,7 +175,7 @@ describe('Entry', () => {
 
         let entryId: string;
         await request(Server)
-            .post('/api/v1/bill')
+            .post('/api/v1/bills')
             .set('Authorization', 'bearer ' + rundata.token)
             .send({})
             .expect(HttpStatus.OK)
@@ -188,7 +193,7 @@ describe('Entry', () => {
 
         const otherlogin = await loginUser();
         return request(Server)
-            .get(`/api/v1/bill/${firstuser.entryId}`)
+            .get(`/api/v1/bills/${firstuser.entryId}`)
             .set('Authorization', 'bearer ' + otherlogin.token)
             .expect(HttpStatus.NOT_FOUND);
     });
@@ -198,7 +203,7 @@ describe('Entry', () => {
 
         const otherlogin = await loginUser();
         return request(Server)
-            .get(`/api/v1/bill/${firstuser.entryId}`)
+            .get(`/api/v1/bills/${firstuser.entryId}`)
             .expect(HttpStatus.UNAUTHORIZED);
     });
 
@@ -206,7 +211,7 @@ describe('Entry', () => {
         const rundata = await loginUserAndCreateEntry();
 
         return request(Server)
-            .put(`/api/v1/bill/${rundata.entryId}`)
+            .put(`/api/v1/bills/${rundata.entryId}`)
             .send({})
             .expect(HttpStatus.UNAUTHORIZED);
     });
@@ -221,7 +226,7 @@ describe('Entry', () => {
             info: TestRandom.randomString(24)
         };
         await request(Server)
-            .put(`/api/v1/bill/${rundata.entryId}`)
+            .put(`/api/v1/bills/${rundata.entryId}`)
             .set('Authorization', 'bearer ' + rundata.token)
             .send(entry)
             .expect(HttpStatus.OK)
@@ -254,13 +259,13 @@ describe('Entry', () => {
             info: TestRandom.randomString(24)
         };
         await request(Server)
-            .put(`/api/v1/bill/${rundata.entryId}`)
+            .put(`/api/v1/bills/${rundata.entryId}`)
             .set('Authorization', 'bearer ' + rundata.token)
             .send(entry)
             .expect(HttpStatus.OK);
 
         return request(Server)
-            .get(`/api/v1/bill/${rundata.entryId}`)
+            .get(`/api/v1/bills/${rundata.entryId}`)
             .set('Authorization', 'bearer ' + rundata.token)
             .expect(HttpStatus.OK)
             .expect('Content-Type', /json/)
@@ -279,7 +284,7 @@ describe('Entry', () => {
         const rundata = await loginUserAndCreateEntry();
         const otherlogin = await loginUser();
         await request(Server)
-            .put(`/api/v1/bill/${rundata.entryId}`)
+            .put(`/api/v1/bills/${rundata.entryId}`)
             .set('Authorization', 'bearer ' + otherlogin.token)
             .send()
             .expect(HttpStatus.NOT_FOUND);
@@ -288,7 +293,7 @@ describe('Entry', () => {
     it('can be deleted', async () => {
         const rundata = await loginUserAndCreateEntry();
         await request(Server)
-            .delete(`/api/v1/bill/${rundata.entryId}`)
+            .delete(`/api/v1/bills/${rundata.entryId}`)
             .set('Authorization', 'bearer ' + rundata.token)
             .expect(HttpStatus.OK);
     });
@@ -296,7 +301,7 @@ describe('Entry', () => {
     it('can be deleted and response contains its values', async () => {
         const rundata = await loginUserAndCreateEntry();
         await request(Server)
-            .delete(`/api/v1/bill/${rundata.entryId}`)
+            .delete(`/api/v1/bills/${rundata.entryId}`)
             .set('Authorization', 'bearer ' + rundata.token)
             .expect(HttpStatus.OK)
             .expect('Content-Type', /json/)
@@ -315,11 +320,11 @@ describe('Entry', () => {
     it('cannot be retrieved after it has been deleted', async () => {
         const rundata = await loginUserAndCreateEntry();
         await request(Server)
-            .delete(`/api/v1/bill/${rundata.entryId}`)
+            .delete(`/api/v1/bills/${rundata.entryId}`)
             .set('Authorization', 'bearer ' + rundata.token)
             .expect(HttpStatus.OK);
         return request(Server)
-            .get(`/api/v1/bill/${rundata.entryId}`)
+            .get(`/api/v1/bills/${rundata.entryId}`)
             .set('Authorization', 'bearer ' + rundata.token)
             .expect(HttpStatus.NOT_FOUND);
     });
@@ -327,7 +332,7 @@ describe('Entry', () => {
     it('cannot be deleted without authorization', async () => {
         const rundata = await loginUserAndCreateEntry();
         await request(Server)
-            .delete(`/api/v1/bill/${rundata.entryId}`)
+            .delete(`/api/v1/bills/${rundata.entryId}`)
             .expect(HttpStatus.UNAUTHORIZED);
     });
 
@@ -336,8 +341,122 @@ describe('Entry', () => {
         const otherlogin = await loginUser();
 
         await request(Server)
-            .delete(`/api/v1/bill/${rundata.entryId}`)
+            .delete(`/api/v1/bills/${rundata.entryId}`)
             .set('Authorization', 'bearer ' + otherlogin.token)
             .expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('list can be retrieved', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        createEntry(rundata, EntryBuilder.with().asRestModel());
+        createEntry(rundata, EntryBuilder.with().asRestModel());
+        createEntry(rundata, EntryBuilder.with().asRestModel());
+
+        await request(Server)
+            .get('/api/v1/bills')
+            .query({
+                perPage: 100,
+                page: 0,
+            })
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK)
+            .expect('Content-Type', /json/)
+            .then(r => {
+                expect(r.body)
+                    .to.be.an('object');
+                expect(r.body).to.have.property('data');
+                expect(r.body).to.have.property('page');
+                expect(r.body).to.have.property('total');
+                expect(r.body.data)
+                    .to.be.an('array')
+                    .of.lengthOf(4);
+            });
+    });
+
+    it('list cannot be accessed without authorization', async () => {
+        await loginUserAndCreateEntry();
+
+        await request(Server)
+            .get('/api/v1/bills')
+            .query({
+                perPage: 100,
+                page: 0,
+            })
+            .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('list cannot be retrieved by other user', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        createEntry(rundata, EntryBuilder.with().asRestModel());
+        createEntry(rundata, EntryBuilder.with().asRestModel());
+        createEntry(rundata, EntryBuilder.with().asRestModel());
+
+        const otherlogin = await loginUser();
+
+        await request(Server)
+            .get('/api/v1/bills')
+            .query({
+                perPage: 100,
+                page: 0,
+            })
+            .set('Authorization', 'bearer ' + otherlogin.token)
+            .expect(HttpStatus.OK)
+            .expect('Content-Type', /json/)
+            .then(r => {
+                expect(r.body)
+                    .to.have.property('data')
+                    .to.be.an('array')
+                    .of.lengthOf(0);
+            });
+    });
+
+    it('list page can be retrieved', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        const listofid: string[] = [rundata.entryId];
+        for (let i = 0; i < 7; i++) {
+            listofid.push(await createEntry(rundata, EntryBuilder.with().asRestModel()));
+        }
+
+        const responseIdList: string[] = []
+
+        for (let i = 1; i < 5; i++) {
+            await request(Server)
+                .get('/api/v1/bills')
+                .query({
+                    perPage: 3,
+                    page: i,
+                })
+                .set('Authorization', 'bearer ' + rundata.token)
+                .expect(HttpStatus.OK)
+                .expect('Content-Type', /json/)
+                .then(r => {
+                    expect(r.body)
+                        .to.have.property('data')
+                        .to.be.an('array');
+                    r.body.data.forEach((b: ResponseModel) => responseIdList.push(b._id));
+                });
+        }
+
+        expect(responseIdList).to.eql(listofid);
+    });
+
+    it('list page can be retrieved even if it is empty', async () => {
+        const rundata = await loginUserAndCreateEntry();
+
+        await request(Server)
+            .get('/api/v1/bills')
+            .query({
+                perPage: 3,
+                page: 10,
+            })
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK)
+            .expect('Content-Type', /json/)
+            .then(r => {
+                expect(r.body)
+                    .to.have.property('data')
+                    .to.be.an('array')
+                    .of.lengthOf(0);
+            });
     });
 });

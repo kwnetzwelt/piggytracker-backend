@@ -2,6 +2,18 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
+export interface CreateOrUpdateModel {
+  date: string,
+  value: number,
+  remunerator: string,
+  category: string,
+  info: string,
+}
+
+export interface ResponseModel extends CreateOrUpdateModel {
+  _id: string
+}
+
 export interface IEntryModel extends mongoose.Document {
   date: Date,
   value: number,
@@ -41,7 +53,7 @@ const schema = new Schema({
     default: Date.now
   },
   dummy: Boolean,
-  fromUser:String,
+  fromUser: String,
 }, { timestamps: true });
 
 export const Entry = mongoose.model<IEntryModel>("bill", schema);

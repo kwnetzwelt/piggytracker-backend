@@ -244,17 +244,36 @@ paths:
           description: provide pagination options of how many entries should be returned per page
           required: true
           type: "number"
+          default: 20
+          minimum: 1
         - name: page
           in: query
-          description: provide pagination options of the page number, that should be returned
+          description: provide pagination options of the page number that should be returned. Counting starts at one.
           required: true
           type: "number"
+          minimum: 0
       responses:
         200:
           description: Success
           schema:
             $ref: "#/definitions/PaginatedEntries"
-  /bill/{id}:
+    post:
+      description: Add a bill
+      tags:
+        - Authenticated
+      parameters:
+        - name: entry
+          in: body
+          description: an entry
+          required: false
+          schema: 
+            $ref: "#/definitions/AddEntryBody"
+      responses:
+        200:
+          description: created
+          schema:
+            $ref: "#/definitions/AddEntryResult"
+  /bills/{id}:
     delete:
       description: Delete an entry. 
       tags:
@@ -324,24 +343,6 @@ paths:
           description: The item does not exist or the authenticated user is not allowed to view it.
         500:
           description: Internal Server Error
-          
-  /bill:
-    post:
-      description: Add a bill
-      tags:
-        - Authenticated
-      parameters:
-        - name: entry
-          in: body
-          description: an entry
-          required: false
-          schema: 
-            $ref: "#/definitions/AddEntryBody"
-      responses:
-        200:
-          description: created
-          schema:
-            $ref: "#/definitions/AddEntryResult"
   /target:
     post:
       description: Add a target

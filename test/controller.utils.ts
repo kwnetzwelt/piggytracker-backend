@@ -6,19 +6,14 @@ import * as HttpStatus from 'http-status-codes';
 import { UserBuilder } from './user.builder';
 import { IUserModel } from '../server/api/models/user';
 import Mongoose from '../server/common/mongoose';
+import { CreateOrUpdateModel } from '../server/api/models/entry';
 
 export interface RunData {
     user: IUserModel,
     password: string,
     token?: string,
     entryId?: string,
-    entry?: {
-        date: string,
-        value: number,
-        remunerator: string,
-        category: string,
-        info: string,
-    }
+    entry?: CreateOrUpdateModel
 }
 
 export async function initDatabase() {

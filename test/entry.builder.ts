@@ -1,13 +1,15 @@
-import { IEntryModel, Entry } from "../server/api/models/entry";
+import { IEntryModel, Entry, CreateOrUpdateModel } from "../server/api/models/entry";
 import { TestRandom } from "./test.random";
 import { RunData } from "./controller.utils";
 
 export class EntryBuilder {
     private _fromUser: string;
-    user(rundata: RunData) {
+
+    public user(rundata: RunData) {
         this._fromUser = String(rundata.user._id);
         return this;
     }
+
     public static with() {
         return new EntryBuilder();
     }
@@ -26,5 +28,16 @@ export class EntryBuilder {
             changed: new Date(),
             fromUser: this._fromUser,
         });
+    }
+
+    public asRestModel(): CreateOrUpdateModel {
+        const entry = this.build();
+        return {
+            date: entry.date?.toISOString().substring(0, 10),
+            value: entry.value,
+            remunerator: entry.remunerator,
+            category: entry.category,
+            info: entry.info,
+        }
     }
 }

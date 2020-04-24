@@ -2,11 +2,12 @@ import EntryService from '../../services/entry.service';
 import { Request, Response, NextFunction } from 'express';
 import * as HttpStatus from 'http-status-codes';
 import { UserProfile } from '../../models/user';
-import { IEntryModel } from '../../models/entry';
+import { IEntryModel, ResponseModel } from '../../models/entry';
+import { PagingResult } from '../../../common/paging.result';
 
 export class Controller {
 
-  private static toResponseBody(doc: IEntryModel) {
+  private static toResponseBody(doc: IEntryModel): ResponseModel {
     return {
       _id: String(doc._id),
       date: doc.date?.toISOString().substring(0, 10),
@@ -31,8 +32,16 @@ export class Controller {
 
   async all(req: Request, res: Response, next: NextFunction) {
     try {
-      const docs = await EntryService.all();
-      return res.status(HttpStatus.OK).json(docs);
+      var perPage = Math.max(0, Math.min(5000, parseInt(req.query.perPage as string)));
+      var page = Math.max(1, parseInt(req.query.page as string));
+
+      const result = await EntryService.all((req.user as UserProfile).group, perPage, page);
+      const response: PagingResult<ResponseModel> = {
+        data: result.data.map(Controller.toResponseBody),
+        total: result.total,
+        page: result.page
+      }
+      return res.status(HttpStatus.OK).json(response);
     }
     catch (err) {
       return next(err);

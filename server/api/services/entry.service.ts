@@ -2,20 +2,25 @@ import { Types as mongooseTypes } from 'mongoose';
 import L from '../../common/logger'
 import * as HttpStatus from 'http-status-codes';
 import * as errors from "../../common/errors";
-
 import { Entry, IEntryModel } from '../models/entry';
+import { PagingResult } from '../../common/paging.result';
 
 export class EntrysService {
 
-  async all(): Promise<IEntryModel[]> {
+  async all(fromUser: string, perPage: number, page: number): Promise<PagingResult<IEntryModel>> {
     L.info('fetch all Entrys');
 
     const docs = await Entry
-      .find()
+      .find({ fromUser })
+      .sort([["date", -1]])
+      .skip((page - 1) * perPage)
+      .limit(perPage)
       .lean()
       .exec() as IEntryModel[];
 
-    return docs;
+    const countResult = await Entry
+      .find({ fromUser }).count();
+    return { data: docs, page, total: countResult };
   }
 
   async byId(id: string, fromUser: string): Promise<IEntryModel> {
