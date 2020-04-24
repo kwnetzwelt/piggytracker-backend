@@ -124,7 +124,7 @@ app.post("/logout", async (req, res) => {
 app.post("/bill",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
         var bill = new Model.BillModel(request.body);
-        bill.changed = new Date();
+        
         bill.fromUser = Model.getUserGroup(request.user);
         var result = await bill.save();
         response.send(result);
@@ -135,7 +135,7 @@ app.post("/bill",passport.authenticate('jwt', { session: false }), async (reques
 
 app.get("/bill/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var bill = await Model.BillModel.find({fromUser:Model.getUserGroup(request.user),_id:request.params.id}).exec();
+        var bill = await Model.BillModel.findOne({fromUser:Model.getUserGroup(request.user),_id:request.params.id}).exec();
         response.send(bill);
     } catch (error) {
         response.status(500).send(error);
@@ -144,9 +144,9 @@ app.get("/bill/:id",passport.authenticate('jwt', { session: false }), async (req
 
 app.put("/bill/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var bill = await Model.BillModel.find({fromUser:Model.getUserGroup(request.user),_id:request.params.id}).exec();
+        var bill = await Model.BillModel.findOne({fromUser:Model.getUserGroup(request.user),_id:request.params.id}).exec();
         bill.set(request.body);
-        bill.changed = new Date();
+        
         var result = await bill.save();
         response.send(result);
     } catch (error) {
@@ -198,7 +198,7 @@ app.post("/target",passport.authenticate('jwt', { session: false }), async (requ
 
 app.get("/target/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var target = await Model.TargetModel.find({fromUser:Model.getUserGroup(request.user), _id:request.params.id}).exec();
+        var target = await Model.TargetModel.findOne({fromUser:Model.getUserGroup(request.user), _id:request.params.id}).exec();
         response.send(target);
     } catch (error) {
         response.status(500).send(error);
@@ -207,7 +207,7 @@ app.get("/target/:id",passport.authenticate('jwt', { session: false }), async (r
 
 app.put("/target/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var target = await Model.TargetModel.find({fromUser:Model.getUserGroup(request.user), _id:request.params.id}).exec();
+        var target = await Model.TargetModel.findOne({fromUser:Model.getUserGroup(request.user), _id:request.params.id}).exec();
         target.set(request.body);
         var result = await target.save();
         response.send(result);

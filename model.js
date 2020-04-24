@@ -38,22 +38,25 @@ module.exports = {
         groupName:String
     }), 
 
-    BillModel : Mongoose.model("bill",{
+    BillModel : Mongoose.model("bill",new Mongoose.Schema({
         date:Date,
         value:Number,
         remunerator:String,
         category:String,
         info:String,
-        changed:Date,
         dummy:Boolean,
-        fromUser:String
-    }),
+        fromUser:String,
+        updatedAt:Date,
+        createdAt:Date,
+    },{timestamps:true})),
 
-    TargetModel : Mongoose.model("target",{
+    TargetModel : Mongoose.model("target",new Mongoose.Schema({
         totals:Array, // objects: {category:CATEGORYNAME,value:VALUE}
-        tid:{type:Number, unique:true},
-        fromUser:String
-    }),
+        tid:Number,
+        fromUser:String,
+        updatedAt:Date,
+        createdAt:Date,
+    },{timestamps:true})),
     InviteMode: Mongoose.model("invite", {
         expires: Date,
         fromUser:{type:Mongoose.SchemaTypes.ObjectId, ref:"UserModel"},
