@@ -144,7 +144,7 @@ app.get("/bill/:id",passport.authenticate('jwt', { session: false }), async (req
 
 app.put("/bill/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var bill = await Model.BillModel.findOne({fromUser:Model.getUserGroup(request.user),_id:request.params.id}).exec();
+        var bill = await Model.BillModel.findOne({fromUser:Model.getUserGroup(request.user),_id:request.params.id});
         bill.set(request.body);
         
         var result = await bill.save();
@@ -156,8 +156,11 @@ app.put("/bill/:id",passport.authenticate('jwt', { session: false }), async (req
 
 app.delete("/bill/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var result = await Model.BillModel.deleteOne({fromUser:Model.getUserGroup(request.user), _id: request.params.id }).exec();
+        var bill = await Model.BillModel.findOne({fromUser:Model.getUserGroup(request.user), _id: request.params.id });
+        bill.deletedAt = new Date();
+        var result = await bill.save();
         response.send(result);
+
     } catch (error) {
         response.status(500).send(error);
     }
@@ -166,12 +169,20 @@ app.delete("/bill/:id",passport.authenticate('jwt', { session: false }), async (
 
 app.get("/bills",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var perPage = Math.max(0,Math.min(5000,parseInt( request.query.perPage)));
-        var page = Math.max(0,parseInt(request.query.page));
-        console.log(perPage + " " + page)
-        var result = await Model.BillModel.find({fromUser:Model.getUserGroup(request.user)}).sort([["date",-1]]).skip((page-1) * perPage).limit(perPage).lean().exec();
-        var countResult = await Model.BillModel.count();
-        response.send({data:result,page:page,total:countResult});
+        if(request.query.updatedAt)
+        {
+            const result = await Model.BillModel.find({fromUser:Model.getUserGroup(request.user),updatedAt:{$gt : new Date(request.query.updatedAt)}}).lean().exec();
+            response.send({data:result});
+        }
+        else
+        {
+            var perPage = Math.max(0,Math.min(5000,parseInt( request.query.perPage)));
+            var page = Math.max(0,parseInt(request.query.page));
+            console.log(perPage + " " + page)
+            var result = await Model.BillModel.find({fromUser:Model.getUserGroup(request.user),deletedAt: { $exists : false }}).sort([["date",-1]]).skip((page-1) * perPage).limit(perPage).lean().exec();
+            var countResult = await Model.BillModel.count({fromUser:Model.getUserGroup(request.user),deletedAt: { $exists : false }});
+            response.send({data:result,page:page,total:countResult});
+        }
     }catch(error) {
         response.status(500).send(error);
     }
@@ -219,7 +230,9 @@ app.put("/target/:id",passport.authenticate('jwt', { session: false }), async (r
 
 app.delete("/target/:id",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-        var result = await Model.TargetModel.deleteOne({fromUser:Model.getUserGroup(request.user), _id: request.params.id }).exec();
+        var target = await Model.TargetModel.findOne({fromUser:Model.getUserGroup(request.user), _id: request.params.id }).exec();
+        target.deletedAt = new Date();
+        var result = await restargetult.save();
         response.send(result);
     } catch (error) {
         response.status(500).send(error);
@@ -228,8 +241,8 @@ app.delete("/target/:id",passport.authenticate('jwt', { session: false }), async
 
 app.get("/targets",passport.authenticate('jwt', { session: false }), async (request, response) => {
     try {
-
-        var result = await Model.TargetModel.find({fromUser:Model.getUserGroup(request.user)}).lean().exec();
+        let query = {fromUser:Model.getUserGroup(request.user),deletedAt: { $exists : false }};
+        var result = await Model.TargetModel.find(query).lean().exec();
         response.send({data:result});
     }catch(error) {
         response.status(500).send(error);

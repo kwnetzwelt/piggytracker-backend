@@ -48,6 +48,7 @@ module.exports = {
         fromUser:String,
         updatedAt:Date,
         createdAt:Date,
+        deletedAt:Date
     },{timestamps:true})),
 
     TargetModel : Mongoose.model("target",new Mongoose.Schema({
@@ -56,6 +57,7 @@ module.exports = {
         fromUser:String,
         updatedAt:Date,
         createdAt:Date,
+        deletedAt:Date
     },{timestamps:true})),
     InviteMode: Mongoose.model("invite", {
         expires: Date,
