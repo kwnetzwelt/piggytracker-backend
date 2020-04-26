@@ -67,6 +67,15 @@ definitions:
       info:
         type: string
         example: "new wheels"
+      updatedAt:
+        type: string
+        format: date
+      createdAt:
+        type: string
+        format: date
+      deletedAt:
+        type: string
+        format: date
   InviteDetails:
     type: object
     title: an invite object
@@ -113,28 +122,33 @@ definitions:
       tid:
         type: number
         description: Target Identifier 
+      updatedAt:
+        type: string
+        format: date
+      createdAt:
+        type: string
+        format: date
+      deletedAt:
+        type: string
+        format: date
   AddTargetBody:
     type: object
     title: target
+    required:
+      - totals
+      - tid
+      - fromUser
     properties:
-      date:
+      _id:
         type: string
-        format: date
-      value:
+        format: id
+      totals:
+        type: array
+        items:
+          $ref: "#/definitions/TargetTotalItem"
+      tid:
         type: number
-        format: float
-        example: 147.87
-        minimum: 0
-        default: 0
-      remunerator:
-        type: string
-        example: "Jane Doe"
-      category:
-        type: string
-        example: car
-      info:
-        type: string
-        example: "new wheels"
+        description: Target Identifier 
   AddEntryResult:
     type: object
     title: entry
@@ -242,16 +256,22 @@ paths:
         - name: perPage
           in: query
           description: provide pagination options of how many entries should be returned per page
-          required: true
+          required: false
           type: "number"
           default: 20
           minimum: 1
         - name: page
           in: query
           description: provide pagination options of the page number that should be returned. Counting starts at one.
-          required: true
+          required: false
           type: "number"
           minimum: 0
+        - name: updatedAt
+          in: query
+          description: if present will return all entries where updatedAt field is greater than provided value. 
+          required: false
+          type: "string"
+          format: "date"
       responses:
         200:
           description: Success
