@@ -134,25 +134,21 @@ definitions:
   AddTargetBody:
     type: object
     title: target
+    required:
+      - totals
+      - tid
+      - fromUser
     properties:
-      date:
+      _id:
         type: string
-        format: date
-      value:
+        format: id
+      totals:
+        type: array
+        items:
+          $ref: "#/definitions/TargetTotalItem"
+      tid:
         type: number
-        format: float
-        example: 147.87
-        minimum: 0
-        default: 0
-      remunerator:
-        type: string
-        example: "Jane Doe"
-      category:
-        type: string
-        example: car
-      info:
-        type: string
-        example: "new wheels"
+        description: Target Identifier 
   AddEntryResult:
     type: object
     title: entry
