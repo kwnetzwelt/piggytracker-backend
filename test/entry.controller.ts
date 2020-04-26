@@ -348,9 +348,9 @@ describe('Entry', () => {
 
     it('list can be retrieved', async () => {
         const rundata = await loginUserAndCreateEntry();
-        createEntry(rundata, EntryBuilder.with().asRestModel());
-        createEntry(rundata, EntryBuilder.with().asRestModel());
-        createEntry(rundata, EntryBuilder.with().asRestModel());
+        await createEntry(rundata, EntryBuilder.with().asRestModel());
+        await createEntry(rundata, EntryBuilder.with().asRestModel());
+        await createEntry(rundata, EntryBuilder.with().asRestModel());
 
         await request(Server)
             .get('/api/v1/bills')

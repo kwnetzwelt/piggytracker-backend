@@ -3,15 +3,28 @@ import { ICategoryAcount } from './categoryaccount';
 
 const Schema = mongoose.Schema;
 
+export interface CreateOrUpdateModel {
+  totals: ICategoryAcount[];
+  tid: number;
+}
+
+export interface ResponseModel extends CreateOrUpdateModel {
+  _id: string
+}
 
 export interface ITargetModel extends mongoose.Document {
   totals: ICategoryAcount[];
-  tid: number
+  tid: number;
+  fromUser: String;
 };
 
 const schema = new Schema({
-    totals: Array,
-    tid: {type:Number, unique:true}
+    totals: [{
+      category: String,
+      value: Number,
+    }],
+    tid: {type:Number, unique:true},
+    fromUser: String,
 });
 
-export const TargetModel = mongoose.model<ITargetModel>("target", schema);
+export const Target = mongoose.model<ITargetModel>("target", schema);

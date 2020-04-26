@@ -137,11 +137,7 @@ definitions:
     required:
       - totals
       - tid
-      - fromUser
     properties:
-      _id:
-        type: string
-        format: id
       totals:
         type: array
         items:
