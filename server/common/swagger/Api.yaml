@@ -343,11 +343,12 @@ paths:
           description: The item does not exist or the authenticated user is not allowed to view it.
         500:
           description: Internal Server Error
-  /target:
+  /targets:
     post:
       description: Add a target
       tags:
         - Authenticated
+        - Targets
       parameters:
         - name: entry
           in: body
@@ -360,21 +361,22 @@ paths:
           description: created
           schema:
             $ref: "#/definitions/AddTargetResult"
-  /targets:
     get:
       tags:
         - Authenticated
+        - Targets
       description: Get all targets
       responses:
         200:
           description: Success
           schema:
             $ref: "#/definitions/TargetsResult"
-  /target/{id}:
+  /targets/{id}:
     delete:
       description: Delete a target. 
       tags:
         - Authenticated
+        - Targets
       parameters:
         - name: id
           type: string
@@ -392,6 +394,7 @@ paths:
       description: Returns the contents of a target. 
       tags:
         - Authenticated
+        - Targets
       parameters:
         - name: id
           type: string
@@ -409,6 +412,7 @@ paths:
       description: Updates the contents of a target. 
       tags:
         - Authenticated
+        - Targets
       parameters:
         - name: id
           type: string
