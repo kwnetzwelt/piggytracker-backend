@@ -32,8 +32,8 @@ export class Controller {
 
   async all(req: Request, res: Response, next: NextFunction) {
     try {
-      var perPage = Math.max(0, Math.min(5000, parseInt(req.query.perPage as string)));
-      var page = Math.max(1, parseInt(req.query.page as string));
+      const perPage = Math.max(0, Math.min(5000, parseInt(req.query.perPage as string)));
+      const page = Math.max(1, parseInt(req.query.page as string));
 
       const result = await EntryService.all((req.user as UserProfile).group, perPage, page);
       const response: PagingResult<ResponseModel> = {

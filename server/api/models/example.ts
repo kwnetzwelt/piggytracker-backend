@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 export interface IExampleModel extends mongoose.Document {
   name: string;
-};
+}
 
 const schema = new Schema({
   name: String

@@ -3,27 +3,27 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 export interface CreateOrUpdateModel {
-  date: string,
-  value: number,
-  remunerator: string,
-  category: string,
-  info: string,
+  date: string;
+  value: number;
+  remunerator: string;
+  category: string;
+  info: string;
 }
 
 export interface ResponseModel extends CreateOrUpdateModel {
-  _id: string
+  _id: string;
 }
 
 export interface IEntryModel extends mongoose.Document {
-  date: Date,
-  value: number,
-  remunerator: string,
-  category: string,
-  info: string,
-  changed: Date,
-  dummy: boolean,
-  fromUser: String,
-};
+  date: Date;
+  value: number;
+  remunerator: string;
+  category: string;
+  info: string;
+  changed: Date;
+  dummy: boolean;
+  fromUser: string;
+}
 
 const schema = new Schema({
   date: {

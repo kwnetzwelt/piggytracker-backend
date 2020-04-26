@@ -9,14 +9,14 @@ export interface CreateOrUpdateModel {
 }
 
 export interface ResponseModel extends CreateOrUpdateModel {
-  _id: string
+  _id: string;
 }
 
 export interface ITargetModel extends mongoose.Document {
   totals: ICategoryAcount[];
   tid: number;
-  fromUser: String;
-};
+  fromUser: string;
+}
 
 const schema = new Schema({
     totals: [{

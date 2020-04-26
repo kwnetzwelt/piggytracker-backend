@@ -1,4 +1,4 @@
 export interface ICategoryAcount {
-    category: string
-    value: number
+    category: string;
+    value: number;
 }

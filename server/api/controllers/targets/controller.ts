@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as HttpStatus from 'http-status-codes';
 import { UserProfile } from '../../models/user';
 import { PagingResult } from '../../../common/paging.result';
-import TargetsService from '../../services/targets';
+import TargetsService from '../../services/targets.service';
 import { ITargetModel, ResponseModel } from '../../models/target';
 
 export class Controller {

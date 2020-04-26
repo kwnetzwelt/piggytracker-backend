@@ -6,7 +6,7 @@ import * as HttpStatus from 'http-status-codes';
 import { TestRandom } from './test.random';
 import { initDatabase, dropDatabase, loginUser, RunData } from './controller.utils';
 import { TargetsBuilder } from './targets.builder';
-import TargetsService from '../server/api/services/targets';
+import TargetsService from '../server/api/services/targets.service';
 
 describe('Target', () => {
     before(async () => {

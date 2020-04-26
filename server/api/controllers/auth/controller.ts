@@ -7,13 +7,13 @@ import { sign } from 'jsonwebtoken';
 export class Controller {
     async login(request: Request, response: Response) {
         try {
-            var user = await UserService.findByName(request.body.username);
-            var hash = hashPassword(request.body.password);
+            const user = await UserService.findByName(request.body.username);
+            const hash = hashPassword(request.body.password);
             if (user?.password == hash) {
                 // from now on we'll identify the user by the id and the id is the only personalized value that goes into our token
-                var userProfile = toProfile(user);
-                var payload = { id: user._id };
-                var token = sign(payload, process.env.PWD_SALT);
+                const userProfile = toProfile(user);
+                const payload = { id: user._id };
+                const token = sign(payload, process.env.PWD_SALT);
                 response.json({ message: "ok", token: token, userProfile: userProfile });
             } else {
                 response.status(HttpStatus.UNAUTHORIZED).json({ "message": "invalid password" });
@@ -25,7 +25,7 @@ export class Controller {
     }
 
     async userinfo(request: Request, response: Response) {
-        var user = request.user as IUserModel;
+        const user = request.user as IUserModel;
         user['password'] = "";
         response.send({
             username: user.username,

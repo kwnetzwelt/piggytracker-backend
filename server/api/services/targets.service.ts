@@ -1,12 +1,11 @@
 import { Types as mongooseTypes } from 'mongoose';
-import L from '../../common/logger'
 import * as HttpStatus from 'http-status-codes';
-import * as errors from "../../common/errors";
+import L from '../../common/logger';
+import * as errors from '../../common/errors';
 
 import { Target, ITargetModel } from '../models/target';
 
 export class TargetsService {
-
   async all(): Promise<ITargetModel[]> {
     L.info('fetch all targets');
 
@@ -60,7 +59,7 @@ export class TargetsService {
     return await Target
       .findOneAndRemove({ _id: id })
       .lean()
-      .exec()
+      .exec();
   }
 }
 
