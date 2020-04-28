@@ -18,13 +18,13 @@ export class TargetsService {
     return docs;
   }
 
-  async byId(id: string): Promise<ITargetModel> {
+  async byId(id: string, fromUser: string): Promise<ITargetModel> {
     L.info(`fetch target with id ${id}`);
 
     if (!mongooseTypes.ObjectId.isValid(id)) throw new errors.HttpError(HttpStatus.BAD_REQUEST);
 
     const doc = await Target
-      .findOne({ _id: id })
+      .findOne({ _id: id, fromUser })
       .lean()
       .exec() as ITargetModel;
 

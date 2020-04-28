@@ -377,6 +377,10 @@ paths:
           description: created
           schema:
             $ref: "#/definitions/AddTargetResult"
+        400:
+          description: Bad request, e.g. the tid already exists.
+        500:
+          description: Internal Server Error
     get:
       tags:
         - Authenticated
@@ -422,6 +426,8 @@ paths:
           description: The requested target
           schema:
             $ref: "#/definitions/AddTargetResult"
+        400:
+          description: Unauthorized
         500:
           description: Internal Server Error
     put:

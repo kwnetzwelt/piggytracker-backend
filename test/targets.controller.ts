@@ -7,6 +7,7 @@ import { TestRandom } from './test.random';
 import { initDatabase, dropDatabase, loginUser, RunData } from './controller.utils';
 import { TargetsBuilder } from './targets.builder';
 import TargetsService from '../server/api/services/targets.service';
+import { Target } from '../server/api/models/target';
 
 describe('Target', () => {
     beforeEach(async () => {
@@ -76,7 +77,7 @@ describe('Target', () => {
                 expect(r.body).to.have.property('_id');
                 return r.body._id;
             });
-        const doc = await TargetsService.byId(_id);
+        const doc = await Target.findOne({ _id }).lean().exec();
 
         expect(doc.fromUser).to.equal(String(rundata.user._id));
         expect(doc.fromUser).to.not.be.undefined;
@@ -117,7 +118,78 @@ describe('Target', () => {
             .set('Authorization', 'bearer ' + otherlogin.token)
             .send(target)
             .expect(HttpStatus.OK);
-        
+
         expect(firstId).to.not.be.eql(secondId);
+    });
+
+    it('cannot be loaded from server without authentication', async () => {
+        const rundata = await loginUser();
+        const target = TargetsBuilder.forTid(230).numberOfTotals(2).build();
+
+        const _id = await request(Server)
+            .post('/api/v1/targets')
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send(target)
+            .expect(HttpStatus.OK)
+            .then(r => {
+                expect(r.body)
+                    .to.be.an('object');
+                expect(r.body).to.have.property('_id');
+                return r.body._id;
+            });
+
+        await request(Server)
+            .get(`/api/v1/targets/${_id}`)
+            .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('can be loaded from server', async () => {
+        const rundata = await loginUser();
+        const target = TargetsBuilder.forTid(230).numberOfTotals(2).build();
+
+        const _id = await request(Server)
+            .post('/api/v1/targets')
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send(target)
+            .expect(HttpStatus.OK)
+            .then(r => {
+                expect(r.body)
+                    .to.be.an('object');
+                expect(r.body).to.have.property('_id');
+                return r.body._id;
+            });
+
+        const doc = await request(Server)
+            .get(`/api/v1/targets/${_id}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK)
+            .then(r => r.body);
+
+        expect(doc._id).to.equal(_id);
+        expect(doc.totals).to.be.an('array').of.lengthOf(2);
+        expect(doc.tid).to.equal(230);
+    });
+
+    it('cannot be loaded from server as other user', async () => {
+        const rundata = await loginUser();
+        const target = TargetsBuilder.forTid(230).numberOfTotals(2).build();
+
+        const _id = await request(Server)
+            .post('/api/v1/targets')
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send(target)
+            .expect(HttpStatus.OK)
+            .then(r => {
+                expect(r.body)
+                    .to.be.an('object');
+                expect(r.body).to.have.property('_id');
+                return r.body._id;
+            });
+
+        const otherlogin = await loginUser();
+        await request(Server)
+            .get(`/api/v1/targets/${_id}`)
+            .set('Authorization', 'bearer ' + otherlogin.token)
+            .expect(HttpStatus.NOT_FOUND);
     });
 });
