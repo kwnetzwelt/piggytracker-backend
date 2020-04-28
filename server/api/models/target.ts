@@ -19,12 +19,14 @@ export interface ITargetModel extends mongoose.Document {
 }
 
 const schema = new Schema({
-    totals: [{
-      category: String,
-      value: Number,
-    }],
-    tid: {type:Number, unique:true},
-    fromUser: String,
+  totals: [{
+    category: String,
+    value: Number,
+  }],
+  tid: { type: Number, required: true },
+  fromUser: String,
 });
+
+schema.index({ tid: 1 }, { unique: true });
 
 export const Target = mongoose.model<ITargetModel>("target", schema);

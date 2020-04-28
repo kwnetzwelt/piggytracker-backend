@@ -4,9 +4,10 @@ import request from 'supertest';
 import Server from '../server';
 import * as HttpStatus from 'http-status-codes';
 import { UserBuilder } from './user.builder';
-import { IUserModel } from '../server/api/models/user';
+import { IUserModel, User } from '../server/api/models/user';
 import Mongoose from '../server/common/mongoose';
-import { CreateOrUpdateModel } from '../server/api/models/entry';
+import { CreateOrUpdateModel, Entry } from '../server/api/models/entry';
+import { Target } from '../server/api/models/target';
 
 export interface RunData {
     user: IUserModel,
@@ -17,15 +18,17 @@ export interface RunData {
 }
 
 export async function initDatabase() {
-    const d = new Date();
-    process.env.MONGO_DB = `unittest-${d.getTime()}`;
+    process.env.MONGO_DB = `unittest`;
     const db = new Mongoose();
     db.init();
+    await Entry.collection.deleteMany({});
+    await User.collection.deleteMany({});
+    await Target.collection.deleteMany({});
+
     return db;
 }
 
 export async function dropDatabase() {
-    await mongoose.connection.db.dropDatabase();
 }
 
 export async function createUser(): Promise<RunData> {

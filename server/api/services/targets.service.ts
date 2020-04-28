@@ -2,6 +2,7 @@ import { Types as mongooseTypes } from 'mongoose';
 import * as HttpStatus from 'http-status-codes';
 import L from '../../common/logger';
 import * as errors from '../../common/errors';
+import { MongoError } from 'mongodb';
 
 import { Target, ITargetModel } from '../models/target';
 
@@ -37,7 +38,10 @@ export class TargetsService {
 
     const target = new Target(targetData);
 
-    const doc = await target.save() as ITargetModel;
+    const doc = await target.save().catch((err: MongoError) => {
+        L.error(err);
+        throw new errors.HttpError(HttpStatus.BAD_REQUEST, err);
+    }) as ITargetModel;
 
     return doc;
   }

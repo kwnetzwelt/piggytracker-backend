@@ -1,10 +1,9 @@
 import mongoose from 'mongoose';
+import L from '../common/logger';
+import { Target } from '../api/models/target';
 
 export default class Mongoose {
   connectionURI = `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`;
-
-  constructor() {
-  }
 
   init() {
     //Set up default mongoose connection
@@ -18,6 +17,15 @@ export default class Mongoose {
 
     //Bind connection to error event (to get notification of connection errors)
     db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+    Target.on('index', (err) => {
+      L.info('Index event on Target');
+      if (err) {
+        L.error('Index error on Target', err);
+      }
+    });
+
+    Target.ensureIndexes();
   }
 
   async done() {

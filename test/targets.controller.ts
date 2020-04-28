@@ -9,11 +9,11 @@ import { TargetsBuilder } from './targets.builder';
 import TargetsService from '../server/api/services/targets.service';
 
 describe('Target', () => {
-    before(async () => {
+    beforeEach(async () => {
         await initDatabase();
     });
 
-    after(async () => {
+    afterEach(async () => {
         await dropDatabase();
     });
 
@@ -52,7 +52,7 @@ describe('Target', () => {
                 ).to.eql(target.totals);
                 expect(r.body.tid).to.eql(target.tid);
                 expect(r.body).to.not.have.property('fromUser');
-                
+
                 const firstTotal = r.body.totals[0];
                 expect(firstTotal).to.be.an('object');
                 expect(firstTotal).to.have.property('category');
@@ -82,5 +82,22 @@ describe('Target', () => {
         expect(doc.fromUser).to.not.be.undefined;
         expect(doc.fromUser).to.not.eql("");
         expect(doc.fromUser).to.not.eql(null);
+    });
+
+    it('cannot be added twice for same tid-value', async () => {
+        const rundata = await loginUser();
+        const target = TargetsBuilder.forTid(230).numberOfTotals(2).build();
+
+        await request(Server)
+            .post('/api/v1/targets')
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send(target)
+            .expect(HttpStatus.OK);
+
+        await request(Server)
+            .post('/api/v1/targets')
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send(target)
+            .expect(HttpStatus.BAD_REQUEST);
     });
 });
