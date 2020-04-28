@@ -100,4 +100,24 @@ describe('Target', () => {
             .send(target)
             .expect(HttpStatus.BAD_REQUEST);
     });
+
+    it('can be added with same tid-value for different users', async () => {
+        const rundata = await loginUser();
+        const target = TargetsBuilder.forTid(230).numberOfTotals(2).build();
+
+        const firstId = await request(Server)
+            .post('/api/v1/targets')
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send(target)
+            .expect(HttpStatus.OK);
+
+        const otherlogin = await loginUser();
+        const secondId = await request(Server)
+            .post('/api/v1/targets')
+            .set('Authorization', 'bearer ' + otherlogin.token)
+            .send(target)
+            .expect(HttpStatus.OK);
+        
+        expect(firstId).to.not.be.eql(secondId);
+    });
 });

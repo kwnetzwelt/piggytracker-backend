@@ -24,9 +24,9 @@ const schema = new Schema({
     value: Number,
   }],
   tid: { type: Number, required: true },
-  fromUser: String,
+  fromUser: { type: String, required: true },
 });
 
-schema.index({ tid: 1 }, { unique: true });
+schema.index({ fromUser: 1, tid: 1 }, { unique: true });
 
 export const Target = mongoose.model<ITargetModel>("target", schema);

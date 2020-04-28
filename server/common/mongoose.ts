@@ -19,13 +19,14 @@ export default class Mongoose {
     db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
     Target.on('index', (err) => {
-      L.info('Index event on Target');
       if (err) {
         L.error('Index error on Target', err);
       }
     });
 
-    Target.ensureIndexes();
+    Target.collection.dropIndexes().then(() => {
+      Target.ensureIndexes();
+    });
   }
 
   async done() {
