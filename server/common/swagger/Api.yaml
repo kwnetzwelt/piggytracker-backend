@@ -11,6 +11,8 @@ tags:
     description: Available without a valid jwt token
   - name: Specification
     description: The swagger API specification
+  - name: Targets
+    description: Per month and category budgets
 
 consumes:
   - application/json
@@ -26,6 +28,22 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/EntryItem"
+      page:
+        type: number
+        format: integer
+        description: page contained in the answer
+      total:
+        type: number
+        format: integer
+        description: Total amount of entries 
+  PaginatedTargets:
+    type: object
+    title: paginated targets
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/TargetTotalItem"
       page:
         type: number
         format: integer
@@ -272,7 +290,7 @@ paths:
           description: provide pagination options of the page number that should be returned. Counting starts at one.
           required: false
           type: "number"
-          minimum: 0
+          minimum: 1
         - name: updatedAt
           in: query
           description: if present will return all entries where updatedAt field is greater than provided value. 
@@ -399,11 +417,27 @@ paths:
         - Authenticated
         - Targets
       description: Get all targets
+      parameters:
+        - name: perPage
+          in: query
+          description: provide pagination options of how many entries should be returned per page
+          required: false
+          type: "number"
+          default: 20
+          minimum: 1
+        - name: page
+          in: query
+          description: provide pagination options of the page number that should be returned. Counting starts at one.
+          required: false
+          type: "number"
+          minimum: 1
       responses:
         200:
           description: Success
           schema:
-            $ref: "#/definitions/TargetsResult"
+            $ref: "#/definitions/PaginatedTargets"
+        401:
+          description: Unauthorized
   /targets/{id}:
     delete:
       description: Delete a target. 

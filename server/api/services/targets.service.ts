@@ -5,17 +5,24 @@ import * as errors from '../../common/errors';
 import { MongoError } from 'mongodb';
 
 import { Target, ITargetModel } from '../models/target';
+import { PagingResult } from '../../common/paging.result';
 
 export class TargetsService {
-  async all(): Promise<ITargetModel[]> {
+  async all(fromUser: string, perPage: number, page: number): Promise<PagingResult<ITargetModel>> {
     L.info('fetch all targets');
 
     const docs = await Target
-      .find()
+      .find({ fromUser })
+      .sort([["tid", 1]])
+      .skip((page - 1) * perPage)
+      .limit(perPage)
       .lean()
       .exec() as ITargetModel[];
+    
+    const countResult = await Target
+      .find({ fromUser }).count();
 
-    return docs;
+    return { data: docs, page, total: countResult };
   }
 
   async byId(id: string, fromUser: string): Promise<ITargetModel> {

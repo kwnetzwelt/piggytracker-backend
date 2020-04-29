@@ -356,7 +356,7 @@ describe('Entry', () => {
             .get('/api/v1/bills')
             .query({
                 perPage: 100,
-                page: 0,
+                page: 1,
             })
             .set('Authorization', 'bearer ' + rundata.token)
             .expect(HttpStatus.OK)
@@ -380,7 +380,7 @@ describe('Entry', () => {
             .get('/api/v1/bills')
             .query({
                 perPage: 100,
-                page: 0,
+                page: 1,
             })
             .expect(HttpStatus.UNAUTHORIZED);
     });
@@ -397,7 +397,7 @@ describe('Entry', () => {
             .get('/api/v1/bills')
             .query({
                 perPage: 100,
-                page: 0,
+                page: 1,
             })
             .set('Authorization', 'bearer ' + otherlogin.token)
             .expect(HttpStatus.OK)
@@ -433,6 +433,10 @@ describe('Entry', () => {
                     expect(r.body)
                         .to.have.property('data')
                         .to.be.an('array');
+                    expect(r.body)
+                        .to.have.property('page').to.equal(i);
+                    expect(r.body)
+                        .to.have.property('total').to.equal(listofid.length);
                     r.body.data.forEach((b: ResponseModel) => responseIdList.push(b._id));
                 });
         }

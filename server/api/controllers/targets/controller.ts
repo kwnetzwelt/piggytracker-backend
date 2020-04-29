@@ -30,6 +30,24 @@ export class Controller {
         return r as ITargetModel;
     }
 
+    async all(req: Request, res: Response, next: NextFunction) {
+        try {
+            const perPage = Math.max(0, Math.min(5000, parseInt(req.query.perPage as string)));
+            const page = Math.max(1, parseInt(req.query.page as string));
+
+            const result = await TargetsService.all((req.user as UserProfile).group, perPage, page);
+            const response: PagingResult<ResponseModel> = {
+                data: result.data.map(Controller.toResponseBody),
+                total: result.total,
+                page: result.page
+            }
+            return res.status(HttpStatus.OK).json(response);
+        }
+        catch (err) {
+            return next(err);
+        }
+    }
+
     async create(req: Request, res: Response, next: NextFunction) {
         try {
             const fields = req.body;
