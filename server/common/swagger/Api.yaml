@@ -145,6 +145,17 @@ definitions:
       tid:
         type: number
         description: Target Identifier 
+  PutTargetBody:
+    type: object
+    title: target
+    properties:
+      totals:
+        type: array
+        items:
+          $ref: "#/definitions/TargetTotalItem"
+      tid:
+        type: number
+        description: Target Identifier 
   AddEntryResult:
     type: object
     title: entry
@@ -444,7 +455,7 @@ paths:
         - name: data
           in: body
           schema: 
-            $ref: "#/definitions/AddTargetBody"
+            $ref: "#/definitions/PutTargetBody"
       responses:
         200:
           description: The updated target

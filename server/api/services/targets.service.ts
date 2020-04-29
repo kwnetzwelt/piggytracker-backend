@@ -39,8 +39,8 @@ export class TargetsService {
     const target = new Target(targetData);
 
     const doc = await target.save().catch((err: MongoError) => {
-        L.error(err);
-        throw new errors.HttpError(HttpStatus.BAD_REQUEST, err);
+      L.error(err);
+      throw new errors.HttpError(HttpStatus.BAD_REQUEST, err);
     }) as ITargetModel;
 
     return doc;
@@ -52,7 +52,10 @@ export class TargetsService {
     const doc = await Target
       .findOneAndUpdate({ _id: id, fromUser }, { $set: targetData }, { new: true })
       .lean()
-      .exec() as ITargetModel;
+      .exec().catch((err: MongoError) => {
+        L.error(err);
+        throw new errors.HttpError(HttpStatus.BAD_REQUEST, err);
+      }) as ITargetModel;
 
     if (!doc) throw new errors.HttpError(HttpStatus.NOT_FOUND);
 

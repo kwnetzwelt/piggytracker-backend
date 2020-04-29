@@ -20,13 +20,14 @@ export class Controller {
 
     private static extractWriteableFieldsFromRequestBody(req: Request) {
         const body = (req.body || {});
-        if (!Array.isArray(body.totals)) {
-            body.totals = [];
+        const r = {};
+        if (body.tid) {
+            r['tid'] = body.tid;
         }
-        return {
-          tid: body.tid,
-          totals: body.totals.map((t: ICategoryAcount) => ({category: t.category, value: t.value}))
-        } as ITargetModel;
+        if (Array.isArray(body.totals)) {
+            r['totals'] = body.totals.map((t: ICategoryAcount) => ({category: t.category, value: t.value}));
+        }
+        return r as ITargetModel;
       }
 
       async create(req: Request, res: Response, next: NextFunction) {

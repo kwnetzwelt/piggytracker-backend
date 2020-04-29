@@ -233,6 +233,26 @@ describe('Target', () => {
             });
     });
 
+    it('can update tid', async () => {
+        const rundata = await loginUserAndCreateEntry(230);
+        const newTid = 240;
+
+        await request(Server)
+            .put(`/api/v1/targets/${rundata.targetId}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send({ tid: newTid})
+            .expect(HttpStatus.OK)
+            .then(r => {
+                expect(r.body)
+                    .to.be.an('object');
+                expect(r.body).to.have.property('_id');
+                expect(r.body).to.have.property('totals').to.be.an('array').of.lengthOf(rundata.target.totals.length);
+                expect(r.body).to.have.property('tid');
+                expect(r.body.tid).to.equal(newTid);
+                expect(r.body._id).to.equal(rundata.targetId);
+            });
+    });
+
     it('cannot be updated without authorization', async () => {
         const rundata = await loginUserAndCreateEntry(230);
         const target = TargetsBuilder.forTid(240).numberOfTotals(3).build();
@@ -253,5 +273,17 @@ describe('Target', () => {
             .set('Authorization', 'bearer ' + otherlogin.token)
             .send(target)
             .expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('cannot be updated with duplicate tid', async() => {
+        const rundata = await loginUserAndCreateEntry(230);
+        const tid240_id = await createTarget(rundata, TargetsBuilder.forTid(240).build());
+        await request(Server)
+            .put(`/api/v1/targets/${tid240_id}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send({
+                tid: rundata.target.tid
+            })
+            .expect(HttpStatus.BAD_REQUEST)
     });
 });
