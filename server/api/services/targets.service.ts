@@ -46,13 +46,15 @@ export class TargetsService {
     return doc;
   }
 
-  async patch(id: string, targetData: ITargetModel): Promise<ITargetModel> {
+  async patch(id: string, fromUser: string, targetData: ITargetModel): Promise<ITargetModel> {
     L.info(`update target with id ${id} with data ${targetData}`);
 
     const doc = await Target
-      .findOneAndUpdate({ _id: id }, { $set: targetData }, { new: true })
+      .findOneAndUpdate({ _id: id, fromUser }, { $set: targetData }, { new: true })
       .lean()
       .exec() as ITargetModel;
+
+    if (!doc) throw new errors.HttpError(HttpStatus.NOT_FOUND);
 
     return doc;
   }

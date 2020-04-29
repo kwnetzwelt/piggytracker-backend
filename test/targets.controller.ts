@@ -7,7 +7,7 @@ import { TestRandom } from './test.random';
 import { initDatabase, dropDatabase, loginUser, RunData } from './controller.utils';
 import { TargetsBuilder } from './targets.builder';
 import TargetsService from '../server/api/services/targets.service';
-import { Target } from '../server/api/models/target';
+import { Target, CreateOrUpdateModel } from '../server/api/models/target';
 
 describe('Target', () => {
     beforeEach(async () => {
@@ -17,6 +17,26 @@ describe('Target', () => {
     afterEach(async () => {
         await dropDatabase();
     });
+
+    async function createTarget(rundata: RunData, target: CreateOrUpdateModel) {
+        return await request(Server)
+            .post('/api/v1/targets')
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send(target)
+            .expect(HttpStatus.OK)
+            .then(r => r.body._id);
+    }
+
+    async function loginUserAndCreateEntry(tid: number) {
+        const rundata = await loginUser();
+        const target = TargetsBuilder.forTid(tid).numberOfTotals(2).build();
+        rundata.target = {
+            totals: target.totals,
+            tid: target.tid,
+        };
+        rundata.targetId = await createTarget(rundata, rundata.target);
+        return rundata;
+    }
 
     it('cannot be added when not authenticated', () => {
         return request(Server)
@@ -190,6 +210,48 @@ describe('Target', () => {
         await request(Server)
             .get(`/api/v1/targets/${_id}`)
             .set('Authorization', 'bearer ' + otherlogin.token)
+            .expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('can be updated', async () => {
+        const rundata = await loginUserAndCreateEntry(230);
+        const target = TargetsBuilder.forTid(240).numberOfTotals(3).build();
+
+        await request(Server)
+            .put(`/api/v1/targets/${rundata.targetId}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .send(target)
+            .expect(HttpStatus.OK)
+            .then(r => {
+                expect(r.body)
+                    .to.be.an('object');
+                expect(r.body).to.have.property('_id');
+                expect(r.body).to.have.property('totals').to.be.an('array').of.lengthOf(target.totals.length);
+                expect(r.body).to.have.property('tid');
+                expect(r.body.tid).to.equal(target.tid);
+                expect(r.body._id).to.equal(rundata.targetId);
+            });
+    });
+
+    it('cannot be updated without authorization', async () => {
+        const rundata = await loginUserAndCreateEntry(230);
+        const target = TargetsBuilder.forTid(240).numberOfTotals(3).build();
+
+        await request(Server)
+            .put(`/api/v1/targets/${rundata.targetId}`)
+            .send(target)
+            .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('cannot be updated by other user', async () => {
+        const rundata = await loginUserAndCreateEntry(230);
+        const otherlogin = await loginUser();
+        const target = TargetsBuilder.forTid(240).numberOfTotals(3).build();
+
+        await request(Server)
+            .put(`/api/v1/targets/${rundata.targetId}`)
+            .set('Authorization', 'bearer ' + otherlogin.token)
+            .send(target)
             .expect(HttpStatus.NOT_FOUND);
     });
 });

@@ -1,20 +1,21 @@
 import { expect } from 'chai';
-import mongoose from 'mongoose';
 import request from 'supertest';
 import Server from '../server';
 import * as HttpStatus from 'http-status-codes';
 import { UserBuilder } from './user.builder';
 import { IUserModel, User } from '../server/api/models/user';
 import Mongoose from '../server/common/mongoose';
-import { CreateOrUpdateModel, Entry } from '../server/api/models/entry';
-import { Target } from '../server/api/models/target';
+import { CreateOrUpdateModel as EntryCreateOrUpdateModel, Entry } from '../server/api/models/entry';
+import { Target, CreateOrUpdateModel as TargetCreateOrUpdateModel } from '../server/api/models/target';
 
 export interface RunData {
     user: IUserModel,
     password: string,
     token?: string,
     entryId?: string,
-    entry?: CreateOrUpdateModel
+    entry?: EntryCreateOrUpdateModel,
+    targetId?: string,
+    target?: TargetCreateOrUpdateModel,
 }
 
 export async function initDatabase() {

@@ -3,8 +3,9 @@ import * as HttpStatus from 'http-status-codes';
 import { UserProfile } from '../../models/user';
 import { PagingResult } from '../../../common/paging.result';
 import TargetsService from '../../services/targets.service';
-import { ITargetModel, ResponseModel } from '../../models/target';
+import { ITargetModel, ResponseModel, CreateOrUpdateModel } from '../../models/target';
 import targetsService from '../../services/targets.service';
+import { ICategoryAcount } from '../../models/categoryaccount';
 
 export class Controller {
     private static toResponseBody(doc: ITargetModel): ResponseModel {
@@ -17,7 +18,18 @@ export class Controller {
         };
     }
 
-    async create(req: Request, res: Response, next: NextFunction) {
+    private static extractWriteableFieldsFromRequestBody(req: Request) {
+        const body = (req.body || {});
+        if (!Array.isArray(body.totals)) {
+            body.totals = [];
+        }
+        return {
+          tid: body.tid,
+          totals: body.totals.map((t: ICategoryAcount) => ({category: t.category, value: t.value}))
+        } as ITargetModel;
+      }
+
+      async create(req: Request, res: Response, next: NextFunction) {
         try {
             const fields = req.body;
             fields.fromUser = (req.user as UserProfile).group
@@ -40,6 +52,17 @@ export class Controller {
             return next(err);
         }
     }
+
+    async patch(req: Request, res: Response, next: NextFunction) {
+        try {
+          const fields = Controller.extractWriteableFieldsFromRequestBody(req);
+          const doc = await targetsService.patch(req.params.id, (req.user as UserProfile).group, fields);
+          return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc));
+        }
+        catch (err) {
+          return next(err);
+        }
+      }
 }
 
 export default new Controller();

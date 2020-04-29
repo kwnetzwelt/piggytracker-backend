@@ -444,7 +444,7 @@ paths:
         - name: data
           in: body
           schema: 
-            $ref: "#/definitions/AddTargetResult"
+            $ref: "#/definitions/AddTargetBody"
       responses:
         200:
           description: The updated target
