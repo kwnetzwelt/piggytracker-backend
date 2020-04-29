@@ -6,6 +6,7 @@ cache:
 
 stages:
   - build
+  - pages
   - upload
 
 build:
@@ -22,7 +23,7 @@ build:
     - coverage
 
 coverage:
-  stage: build
+  stage: pages
   dependencies:
     - build
   script:
