@@ -3,16 +3,14 @@ image: node:lts
 cache:
     paths:
     - dist
+    - node_modules
 
 stages:
   - build
-  - pages
+  - test
   - upload
 
 build:
-  only:
-    refs:
-      - master
   stage: build
   script:
     - npm ci
@@ -22,8 +20,16 @@ build:
     paths:
     - coverage
 
+test:
+  stage: test
+  script:
+    - npm run test:coverage
+  artifacts:
+    paths:
+    - coverage
+
 coverage:
-  stage: pages
+  stage: deploy
   dependencies:
     - build
   script:
@@ -36,7 +42,7 @@ coverage:
     - master
 
 .upload_template: &upload_template
-  stage: upload
+  stage: deploy
   script:
     - mkdir -p ~/.ssh
     - which ssh-agent || ( apk --update add openssh-client )
