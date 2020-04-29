@@ -1,5 +1,8 @@
 image: node:lts
 
+services:
+  - mongo:latest
+
 cache:
     paths:
     - dist
@@ -23,7 +26,8 @@ build:
 test:
   stage: test
   script:
-    - npm run test:coverage
+    - cp .env-default .env
+    - MONGO_HOST=mongo npm run test:coverage
   artifacts:
     paths:
     - coverage
