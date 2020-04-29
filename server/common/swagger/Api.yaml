@@ -364,10 +364,12 @@ paths:
           description: The updated entry
           schema:
             $ref: "#/definitions/AddEntryResult"
+        400:
+          description: Malformed request.
         401:
           description: Unauthorized.
         404:
-          description: The item does not exist or the authenticated user is not allowed to view it.
+          description: The item does not exist or the authenticated user is not allowed to update it.
         500:
           description: Internal Server Error
   /targets:
@@ -419,6 +421,10 @@ paths:
           description: The deleted target
           schema:
             $ref: "#/definitions/AddTargetResult"
+        401:
+          description: Unauthorized
+        404:
+          description: The item does not exist or the authenticated user is not allowed to update it.
         500:
           description: Internal Server Error
     get:
@@ -437,8 +443,10 @@ paths:
           description: The requested target
           schema:
             $ref: "#/definitions/AddTargetResult"
-        400:
+        401:
           description: Unauthorized
+        404:
+          description: The item does not exist or the authenticated user is not allowed to view it.
         500:
           description: Internal Server Error
     put:
@@ -461,6 +469,12 @@ paths:
           description: The updated target
           schema:
             $ref: "#/definitions/AddTargetResult"
+        400:
+          description: Malformed request.
+        401:
+          description: Unauthorized
+        404:
+          description: The item does not exist or the authenticated user is not allowed to update it.
         500:
           description: Internal Server Error
 

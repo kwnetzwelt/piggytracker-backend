@@ -240,7 +240,7 @@ describe('Target', () => {
         await request(Server)
             .put(`/api/v1/targets/${rundata.targetId}`)
             .set('Authorization', 'bearer ' + rundata.token)
-            .send({ tid: newTid})
+            .send({ tid: newTid })
             .expect(HttpStatus.OK)
             .then(r => {
                 expect(r.body)
@@ -275,7 +275,7 @@ describe('Target', () => {
             .expect(HttpStatus.NOT_FOUND);
     });
 
-    it('cannot be updated with duplicate tid', async() => {
+    it('cannot be updated with duplicate tid', async () => {
         const rundata = await loginUserAndCreateEntry(230);
         const tid240_id = await createTarget(rundata, TargetsBuilder.forTid(240).build());
         await request(Server)
@@ -284,6 +284,57 @@ describe('Target', () => {
             .send({
                 tid: rundata.target.tid
             })
-            .expect(HttpStatus.BAD_REQUEST)
+            .expect(HttpStatus.BAD_REQUEST);
+    });
+
+    it('can be deleted', async () => {
+        const rundata = await loginUserAndCreateEntry(230);
+        await request(Server)
+            .delete(`/api/v1/targets/${rundata.targetId}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK);
+    });
+
+    it('can be deleted and response contains its values', async () => {
+        const rundata = await loginUserAndCreateEntry(230);
+        await request(Server)
+            .delete(`/api/v1/targets/${rundata.targetId}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK)
+            .expect('Content-Type', /json/)
+            .then(r => {
+                expect(r.body).to.have.property('_id').to.equal(rundata.targetId);
+                expect(r.body).to.have.property('tid').to.equal(rundata.target.tid);
+                expect(r.body).to.have.property('totals').to.be.an('array').of.length(rundata.target.totals.length);
+            });
+    });
+
+    it('cannot be retrieved after it has been deleted', async () => {
+        const rundata = await loginUserAndCreateEntry(230);
+        await request(Server)
+            .delete(`/api/v1/targets/${rundata.targetId}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK);
+        return request(Server)
+            .get(`/api/v1/targets/${rundata.targetId}`)
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('cannot be deleted without authorization', async () => {
+        const rundata = await loginUserAndCreateEntry(230);
+        await request(Server)
+            .delete(`/api/v1/targets/${rundata.targetId}`)
+            .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('cannot be deleted by other user', async () => {
+        const rundata = await loginUserAndCreateEntry(230);
+        const otherlogin = await loginUser();
+
+        await request(Server)
+            .delete(`/api/v1/targets/${rundata.targetId}`)
+            .set('Authorization', 'bearer ' + otherlogin.token)
+            .expect(HttpStatus.NOT_FOUND);
     });
 });

@@ -25,12 +25,12 @@ export class Controller {
             r['tid'] = body.tid;
         }
         if (Array.isArray(body.totals)) {
-            r['totals'] = body.totals.map((t: ICategoryAcount) => ({category: t.category, value: t.value}));
+            r['totals'] = body.totals.map((t: ICategoryAcount) => ({ category: t.category, value: t.value }));
         }
         return r as ITargetModel;
-      }
+    }
 
-      async create(req: Request, res: Response, next: NextFunction) {
+    async create(req: Request, res: Response, next: NextFunction) {
         try {
             const fields = req.body;
             fields.fromUser = (req.user as UserProfile).group
@@ -56,14 +56,24 @@ export class Controller {
 
     async patch(req: Request, res: Response, next: NextFunction) {
         try {
-          const fields = Controller.extractWriteableFieldsFromRequestBody(req);
-          const doc = await targetsService.patch(req.params.id, (req.user as UserProfile).group, fields);
-          return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc));
+            const fields = Controller.extractWriteableFieldsFromRequestBody(req);
+            const doc = await targetsService.patch(req.params.id, (req.user as UserProfile).group, fields);
+            return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc));
         }
         catch (err) {
-          return next(err);
+            return next(err);
         }
-      }
+    }
+
+    async remove(req: Request, res: Response, next: NextFunction) {
+        try {
+            const doc = await targetsService.remove(req.params.id/*, (req.user as UserProfile).group*/);
+            return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc as any));
+        }
+        catch (err) {
+            return next(err);
+        }
+    }
 }
 
 export default new Controller();
