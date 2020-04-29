@@ -62,13 +62,17 @@ export class TargetsService {
     return doc;
   }
 
-  async remove(id: string) {
+  async remove(id: string, fromUser: string) {
     L.info(`delete target with id ${id}`);
 
-    return await Target
-      .findOneAndRemove({ _id: id })
+    const doc = await Target
+      .findOneAndRemove({ _id: id, fromUser })
       .lean()
       .exec();
+
+    if (!doc) throw new errors.HttpError(HttpStatus.NOT_FOUND);
+
+    return doc;
   }
 }
 
