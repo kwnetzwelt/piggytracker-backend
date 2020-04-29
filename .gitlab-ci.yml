@@ -23,7 +23,8 @@ test:
   stage: test
   script:
     - cp .env-default .env
-    - MONGO_HOST=mongo npm run test:coverage
+    - export MONGO_HOST=mongo
+    - npm run test:coverage
   artifacts:
     paths:
     - coverage
