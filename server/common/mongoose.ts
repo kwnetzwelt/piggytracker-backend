@@ -6,6 +6,8 @@ export default class Mongoose {
   connectionURI = `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`;
 
   init() {
+    L.info("Using connection " + this.connectionURI);
+
     //Set up default mongoose connection
     mongoose.connect(this.connectionURI);
 
