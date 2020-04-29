@@ -1,0 +1,60 @@
+image: node:lts
+
+cache:
+    paths:
+    - dist
+
+stages:
+  - build
+  - upload
+
+build:
+  only:
+    refs:
+      - master
+  stage: build
+  script:
+    - npm ci
+    - npm run build
+    - npm run test:coverage
+  artifacts:
+    paths:
+    - coverage
+
+coverage:
+  stage: build
+  dependencies:
+    - build
+  script:
+    - mv coverage/ public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - master
+
+.upload_template: &upload_template
+  stage: upload
+  script:
+    - mkdir -p ~/.ssh
+    - which ssh-agent || ( apk --update add openssh-client )
+    - eval $(ssh-agent -s)
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - echo "$SSH_PRIVATE_KEY" | ssh-add -
+    - scp  -r build/* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+
+upload-prod:
+  <<: *upload_template
+  variables:
+    DEPLOY_PATH: $DEPLOY_PATH_PROD
+  only:
+    - tags
+
+upload-preview:
+  <<: *upload_template
+  variables:
+    DEPLOY_PATH: $DEPLOY_PATH_PREVIEW
+  only:
+    refs:
+      - master
