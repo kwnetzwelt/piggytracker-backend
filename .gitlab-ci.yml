@@ -1,7 +1,7 @@
 image: node:lts
 
 services:
-  - mongo:latest
+  - mongo
 
 cache:
     paths:
