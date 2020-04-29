@@ -24,6 +24,7 @@ test:
   script:
     - cp .env-default .env
     - export MONGO_HOST=mongo
+    - export MONGO_PORT=27017
     - npm run test:coverage
   artifacts:
     paths:
