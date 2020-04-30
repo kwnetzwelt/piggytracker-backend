@@ -119,7 +119,23 @@ describe('Invites', () => {
         
     });
     
-    
+    xit("can clear group for user", async () => {
+        const rundata1 = await loginUser();
+        const invite = await createInvite(rundata1);
+        const rundata2 = await loginUser();
+        await consumeInvite(rundata2,invite);
+        
+        await request(Server)
+            .delete(`/api/v1/invite/`)
+            .set('Authorization', 'bearer ' + rundata2.token)
+            .send()
+            .expect(HttpStatus.OK);
+
+        const rundata3 = await loginUser(rundata2);
+        
+        expect(rundata3.user.groupId).equals("");
+        expect(rundata3.user.groupName).equals("");
+    });
     
 
     // aus zwei wird eins
