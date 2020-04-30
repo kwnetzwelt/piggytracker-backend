@@ -114,7 +114,7 @@ describe('Entry', () => {
     it('can be retrieved by id', async () => {
         const rundata = await loginUser();
         const entry = EntryBuilder.with().user(rundata).build();
-        entry.save();
+        await entry.save();
 
         return request(Server)
             .get(`/api/v1/bills/${entry._id}`)
