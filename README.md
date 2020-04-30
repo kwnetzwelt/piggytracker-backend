@@ -28,9 +28,18 @@ Install all package dependencies (one time operation)
 npm install
 ```
 
+
+## Copy default configuration
+
+To get started on your local machine you can use the default config file. Feel free to change this file later on. 
+
+```shell
+cp .env-default .env
+```
+
 ## Run It
 #### Run in *development* mode:
-Runs the application is development mode. Should not be used in production
+Runs the application in development mode. Should not be used in production
 
 ```shell
 npm run dev
