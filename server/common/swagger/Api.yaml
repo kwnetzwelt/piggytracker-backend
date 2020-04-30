@@ -84,6 +84,7 @@ definitions:
         example: car
       info:
         type: string
+        default: ""
         example: "new wheels"
       updatedAt:
         type: string
@@ -203,6 +204,7 @@ definitions:
         example: car
       info:
         type: string
+        default: ""
         example: "new wheels"
   AddEntryBody:
     type: object
@@ -225,6 +227,7 @@ definitions:
         example: car
       info:
         type: string
+        default: ""
         example: "new wheels"
   ConsumeInviteBody:
     type: object
