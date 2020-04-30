@@ -37,6 +37,14 @@ To get started on your local machine you can use the default config file. Feel f
 cp .env-default .env
 ```
 
+## Create user
+
+```shell
+npm run cli -- --help
+npm run cli -- createuser <USERNAME>
+
+```
+
 ## Run It
 #### Run in *development* mode:
 Runs the application in development mode. Should not be used in production
