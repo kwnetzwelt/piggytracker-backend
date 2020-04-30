@@ -13,13 +13,13 @@ program
     .command('setpassword <username>')
     .description("set the password for the given user. ")
     .action(async (username) => {
-        const user = await UserService.findByName(username);
+        const user = await User.findOne({"username":username});
         if (!user) {
             L.error("User not found");
         } else {
             const newpassword = getConsoleInput('Enter new password: ');
             user.password = hashPassword(newpassword);
-            user.save();
+            await user.save();
         }
         await mongoose.done();
     });
