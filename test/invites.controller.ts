@@ -60,19 +60,19 @@ describe('Invites', () => {
         return response;
     }
 
-    xit("invite code is a string with 9 chars length", async () => {
+    it("invite code is a string with 9 chars length", async () => {
         const rundata1 = await loginUser();
         const invite = await createInvite(rundata1);
         expect(invite.code).lengthOf(9);
     });
 
-    xit("expires in the future", async () => {
+    it("expires in the future", async () => {
         const rundata1 = await loginUser();
         const invite = await createInvite(rundata1);
         expect(invite.expires).is.greaterThan(new Date());
     });
     
-    xit("cannot be consumed by issuing user", async () => {
+    it("cannot be consumed by issuing user", async () => {
         const rundata1 = await loginUser();
         const invite = await createInvite(rundata1);
 
@@ -89,7 +89,7 @@ describe('Invites', () => {
         });
     });
     
-    xit("can be consumed by other user", async () => {
+    it("can be consumed by other user", async () => {
         const rundata1 = await loginUser();
         const invite = await createInvite(rundata1);
         const rundata2 = await loginUser();
@@ -104,7 +104,7 @@ describe('Invites', () => {
         expect(rundata3.user.groupId).equals(rundata2.user.groupId);
         expect(rundata3.user.groupName).equals(rundata2.user.groupName);
     });
-    xit("cannot be consumed twice", async () => {
+    it("cannot be consumed twice", async () => {
         const rundata1 = await loginUser();
         const invite = await createInvite(rundata1);
         const rundata2 = await loginUser();
@@ -119,7 +119,7 @@ describe('Invites', () => {
         
     });
     
-    xit("can clear group for user", async () => {
+    it("can clear group for user", async () => {
         const rundata1 = await loginUser();
         const invite = await createInvite(rundata1);
         const rundata2 = await loginUser();

@@ -26,7 +26,7 @@ export class Controller {
       remunerator: body.remunerator,
       category: body.category,
       info: body.info,
-      changed: new Date(),
+      changed: new Date(), //TODO Needs to be removed
     } as IEntryModel;
   }
 
