@@ -287,7 +287,7 @@ definitions:
         example: ok
 
 paths:
-  /bills/updated:
+  /updates:
     get:
       tags:
         - Authenticated
