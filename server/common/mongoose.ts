@@ -3,7 +3,7 @@ import L from '../common/logger';
 import { Target } from '../api/models/target';
 
 export default class Mongoose {
-  connectionURI = `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`;
+  connectionURI = process.env.MONGO_CONNECTION ?? `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`;
 
   init() {
     L.info("Using connection " + this.connectionURI);
