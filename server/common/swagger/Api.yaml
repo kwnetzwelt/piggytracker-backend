@@ -13,6 +13,10 @@ tags:
     description: The swagger API specification
   - name: Targets
     description: Per month and category budgets
+  - name: Invites
+    description: Group users and share the data
+  - name: Entries
+    description: Spending money
 
 consumes:
   - application/json
@@ -279,6 +283,7 @@ paths:
     get:
       tags:
         - Authenticated
+        - Entries
       description: Get all bills
       parameters:
         - name: perPage
@@ -305,10 +310,15 @@ paths:
           description: Success
           schema:
             $ref: "#/definitions/PaginatedEntries"
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
     post:
       description: Add a bill
       tags:
         - Authenticated
+        - Entries
       parameters:
         - name: entry
           in: body
@@ -321,11 +331,18 @@ paths:
           description: created
           schema:
             $ref: "#/definitions/AddEntryResult"
+        400:
+          description: Malformed request.
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
   /bills/{id}:
     delete:
       description: Delete an entry. 
       tags:
         - Authenticated
+        - Entries
       parameters:
         - name: id
           type: string
@@ -347,6 +364,7 @@ paths:
       description: Returns the contents of an entry. 
       tags:
         - Authenticated
+        - Entries
       parameters:
         - name: id
           type: string
@@ -370,6 +388,7 @@ paths:
       description: Updates the contents of an entry. 
       tags:
         - Authenticated
+        - Entries
       parameters:
         - name: id
           type: string
@@ -393,6 +412,7 @@ paths:
           description: The item does not exist or the authenticated user is not allowed to update it.
         500:
           description: Internal Server Error
+
   /targets:
     post:
       description: Add a target
@@ -413,6 +433,8 @@ paths:
             $ref: "#/definitions/AddTargetResult"
         400:
           description: Bad request, e.g. the tid already exists.
+        401:
+          description: Unauthorized.
         500:
           description: Internal Server Error
     get:
@@ -441,6 +463,8 @@ paths:
             $ref: "#/definitions/PaginatedTargets"
         401:
           description: Unauthorized
+        500:
+          description: Internal Server Error
   /targets/{id}:
     delete:
       description: Delete a target. 
@@ -520,28 +544,35 @@ paths:
       description: Returns an invite code. Valid for 2 hours. Can be consumed by one user. 
       tags:
         - Authenticated
+        - Invites
       responses:
         200:
           description: The requested target
           schema:
             $ref: "#/definitions/InviteDetails"
+        401:
+          description: Unauthorized
         500:
           description: Internal Server Error
     delete:
       description: Deletes group invite (membership in this case) on the currently logged in user
       tags:
         - Authenticated
+        - Invites
       responses:
         200:
           description: Returns updated user details
           schema:
             $ref: "#/definitions/UserDetails"
+        401:
+          description: Unauthorized
         500:
           description: Internal Server Error
     post:
       description: Consumes an invite
       tags:
         - Authenticated
+        - Invites
       parameters:
         - name: code
           in: body
@@ -554,9 +585,13 @@ paths:
           description: updated user details
           schema:
             $ref: "#/definitions/UserDetails"
+        400:
+          description: Malformed request.
+        401:
+          description: Unauthorized
         500:
           description: Internal Server Error (e.g. expired invite code)
-          
+
   /login:
     get:
       tags:
@@ -567,6 +602,10 @@ paths:
           description: ok
           schema:
             $ref: '#/definitions/UserDetails'
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error (e.g. expired invite code)
     post:
       tags:
         - Authentication
@@ -585,6 +624,9 @@ paths:
             $ref: '#/definitions/LoginSuccessfulResponse'
         401:
           description: login failed
+        500:
+          description: Internal Server Error (e.g. expired invite code)
+
   /logout:
     post:
       tags:
@@ -596,7 +638,9 @@ paths:
           schema:
             $ref: '#/definitions/MessageResponse'
         401:
-          description: login failed
+          description: logout failed
+        500:
+          description: Internal Server Error (e.g. expired invite code)
 
   /spec:
     get:
