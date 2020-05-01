@@ -36,17 +36,17 @@ export class InvitesService {
    * @param code 
    * @param fromUser 
    */
-  async remove(code: string, fromUser: string): Promise<Pick<IInviteModel, "fromUser" | "expires" | "code" >> {
+  async remove(code: string): Promise<Pick<IInviteModel, "fromUser" | "expires" | "code" >> {
     L.info(`delete Invite with code ${code}`);
 
     const doc = await Invite
-      .findOneAndRemove({ code: code, fromUser:fromUser })
+      .findOneAndRemove({ code: code })
       .lean()
       .exec();
 
     if (!doc) throw new errors.HttpError(HttpStatus.NOT_FOUND);
 
-    return doc;
+    return doc as IInviteModel;
     return Promise.reject();
   }
 }

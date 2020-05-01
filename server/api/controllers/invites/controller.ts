@@ -11,18 +11,24 @@ export class Controller {
   
   async consume(req:Request, res:Response, next:NextFunction) {
     try {
-      var invite = await InvitesService.remove(req.body.code,req.body.fromUser);
-      if(invite.expires < new Date())
+      const invite = await InvitesService.remove(req.body.code);
+      if(new Date(invite.expires) > new Date())
       {
+        if(invite.fromUser === (req.user as UserProfile).id)
+        {
+          res.status(409).send({message:"You cannot consume your own invite. "});
+        }else
+        {
           var invitedUser = await UserService.setUserGroup((req.user as UserProfile).id, invite.fromUser);
           res.send(invitedUser);
+        }
       }else
       {
-          res.status(500).send("Expired");
+          res.status(500).send({message:"Expired"});
       } 
     }catch(error)
     {
-        res.status(500).send(error);
+        res.status(error.status).send(error);
     }
 
   }
@@ -31,7 +37,7 @@ export class Controller {
 
       const inviteData = {
         expires : new Date (new Date().getTime() + (2 * 60 * 60 * 1000)),
-        fromUser : req.user,
+        fromUser : (req.user as UserProfile).id,
         code : crypto.randomBytes(5).toString('hex').substr(0,9),
       } as IInviteModel;
 

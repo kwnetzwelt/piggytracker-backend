@@ -45,7 +45,7 @@ export class UserService {
     invitedUser.groupId = invitingUser._id;
     invitedUser.groupName = invitingUser.fullname;
     const result = await invitedUser.save();
-    return result as IUserModel;
+    return (result as IUserModel);
   }
 }
 

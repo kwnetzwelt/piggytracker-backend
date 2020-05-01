@@ -9,7 +9,7 @@ import { initDatabase, dropDatabase, loginUser, RunData, createUser } from './co
 //import { InvitesService } from '../server/api/services/invites.service';
 import { CreateOrUpdateModel, ResponseModel, Invite, IInviteModel } from '../server/api/models/invite';
 import { response } from 'express';
-import { User } from '../server/api/models/user';
+import { User, IUserModel } from '../server/api/models/user';
 import { HttpError } from '../server/common/errors';
 
 describe('Invites', () => {
@@ -37,14 +37,14 @@ describe('Invites', () => {
                     expect(r.body).to.have.property('fromUser');
                     expect(r.body.fromUser).to.be.a("string");
                     expect(r.body.code).to.be.a("string");
-                    expect(r.body.expires).to.be.a("Date");
+                    expect(r.body.expires).to.be.a("number");
 
                 invite = new Invite(r.body);
             });
         return invite;
     };
     
-    async function consumeInvite(rundata: RunData,invite:IInviteModel) {
+    async function consumeInvite(rundata: RunData,invite:IInviteModel) : Promise<any> {
         let response = new User();
         await request(Server)
             .post(`/api/v1/invites`)
@@ -54,7 +54,7 @@ describe('Invites', () => {
             .then(r => {
                 expect(r.body)
                     .to.be.an('object');
-                response = new User(r.body);
+                response = r.body;
             });
         
         return response;
@@ -69,7 +69,7 @@ describe('Invites', () => {
     it("expires in the future", async () => {
         const rundata1 = await loginUser();
         const invite = await createInvite(rundata1);
-        expect(invite.expires).is.greaterThan(new Date());
+        expect(invite.expires).is.greaterThan(new Date().getDate());
     });
     
     it("cannot be consumed by issuing user", async () => {
@@ -95,8 +95,9 @@ describe('Invites', () => {
         const rundata2 = await loginUser();
         const result = await consumeInvite(rundata2,invite);
 
-        expect(result).to.have.property('group');
-        expect(result.groupId).equals(rundata1.user._id);
+        expect(result).to.have.property('groupId');
+        expect(result.groupId).equals(String(rundata1.user._id));
+        expect(result).to.have.property('groupName');
         expect(result.groupName).equals(rundata1.user.fullname);
 
         // check group data is stored in user
@@ -132,9 +133,9 @@ describe('Invites', () => {
             .expect(HttpStatus.OK);
 
         const rundata3 = await loginUser(rundata2);
-        
-        expect(rundata3.user.groupId).equals("");
-        expect(rundata3.user.groupName).equals("");
+        expect(rundata3.user.id).equals(rundata2.user.id);
+        expect(rundata3.user.groupId).equals(rundata3.user.id);
+        expect(rundata3.user.groupName).equals(rundata3.user.fullname);
     });
     
 
