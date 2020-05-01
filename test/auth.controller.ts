@@ -6,6 +6,7 @@ import * as HttpStatus from 'http-status-codes';
 import { IUserModel } from '../server/api/models/user';
 import { UserBuilder } from './user.builder';
 import { initDatabase, dropDatabase, createUser, loginUser } from './controller.utils';
+import { UserService } from '../server/api/services/user.service';
 
 
 describe('Auth', () => {
@@ -16,7 +17,23 @@ describe('Auth', () => {
     after(async () => {
         await dropDatabase();
     });
+    it('should reject deleted user', async () => {
+        const rundata = await loginUser();
+        
+        await new UserService().deleteByName(rundata.user.username);
 
+        return request(Server)
+            .post('/api/v1/login')
+            .send({ username: rundata.user.username, password: rundata.password })
+            .expect(HttpStatus.UNAUTHORIZED)
+            .expect('Content-Type', /json/)
+            .then(r => {
+                expect(r.body)
+                    .to.be.an('object')
+                    .that.has.property('message')
+                    .to.equal('invalid password');
+            });
+    });
     it('should reject wrong password', async () => {
         let password: string;
         const testuser = UserBuilder.default(p => password = p);

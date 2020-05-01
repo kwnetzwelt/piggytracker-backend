@@ -2,7 +2,7 @@ import EntryService from '../../services/entry.service';
 import { Request, Response, NextFunction } from 'express';
 import * as HttpStatus from 'http-status-codes';
 import { UserProfile } from '../../models/user';
-import { IEntryModel, ResponseModel } from '../../models/entry';
+import { IEntryModel, ResponseModel, EntryArrayResponse } from '../../models/entry';
 import { PagingResult } from '../../../common/paging.result';
 
 export class Controller {
@@ -47,7 +47,7 @@ export class Controller {
       return next(err);
     }
   }
-
+  
   async byId(req: Request, res: Response, next: NextFunction) {
     try {
       const doc = await EntryService.byId(req.params.id, (req.user as UserProfile).groupId);
