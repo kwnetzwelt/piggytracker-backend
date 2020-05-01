@@ -6,9 +6,18 @@ import { Entry, IEntryModel } from '../models/entry';
 import { PagingResult } from '../../common/paging.result';
 
 export class EntrysService {
+  async updated(fromUser: string, updatedAt: Date):Promise<IEntryModel[]> {
+    L.info('fetch entries since');
+    const docs = await Entry
+      .find({fromUser,updatedAt:{$gt : updatedAt}})
+      .lean()
+      .exec() as IEntryModel[];
+
+    return docs;
+  }
 
   async all(fromUser: string, perPage: number, page: number): Promise<PagingResult<IEntryModel>> {
-    L.info('fetch all Entrys');
+    L.info('fetch all entries');
 
     const docs = await Entry
       .find({ fromUser })

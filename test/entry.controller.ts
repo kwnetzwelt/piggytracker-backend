@@ -463,4 +463,34 @@ describe('Entry', () => {
                     .of.lengthOf(0);
             });
     });
+    it('can return updated entries', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        await request(Server)
+            .get('/api/v1/bills/updated')
+            .query({ updatedMillisecondsAgo: 100000})
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK)
+            .expect('Content-Type', /json/)
+            .then(r => {
+                expect(r.body)
+                    .to.have.property('data')
+                    .to.be.an('array')
+                    .of.length(1);
+            });
+    });
+    it('does not return old entries', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        await request(Server)
+            .get('/api/v1/bills/updated')
+            .query({ updatedMillisecondsAgo: 0})
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK)
+            .expect('Content-Type', /json/)
+            .then(r => {
+                expect(r.body)
+                    .to.have.property('data')
+                    .to.be.an('array')
+                    .of.lengthOf(0);
+            });
+    });
 });

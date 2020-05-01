@@ -24,6 +24,14 @@ produces:
   - application/json
 
 definitions:
+  EntryArrayResponse:
+    type: object
+    title: paginated entries
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/EntryItem"
   PaginatedEntries:
     type: object
     title: paginated entries
@@ -279,6 +287,29 @@ definitions:
         example: ok
 
 paths:
+  /bills/updated:
+    get:
+      tags:
+        - Authenticated
+        - Entries
+      description: Gets all bills accessible to the user, that where updated since the given datetime
+      parameters:
+        - name: updatedMillisecondsAgo
+          in: query
+          description: all entries, where updatedAt field is greater than (new Date() - <updatedMillisecondsAgo>). 
+          required: true
+          type: "number"
+          minimum: 0
+          maximum: 120000
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: "#/definitions/EntryArrayResponse"
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
   /bills:
     get:
       tags:
@@ -299,12 +330,6 @@ paths:
           required: false
           type: "number"
           minimum: 1
-        - name: updatedAt
-          in: query
-          description: if present will return all entries where updatedAt field is greater than provided value. 
-          required: false
-          type: "string"
-          format: "date"
       responses:
         200:
           description: Success

@@ -13,7 +13,6 @@ export interface CreateOrUpdateModel {
 export interface ResponseModel extends CreateOrUpdateModel {
   _id: string;
 }
-
 export interface IEntryModel extends mongoose.Document {
   date: Date;
   value: number;
@@ -25,6 +24,9 @@ export interface IEntryModel extends mongoose.Document {
   fromUser: string;
 }
 
+export interface EntryArrayResponse {
+  data: IEntryModel[];
+}
 const schema = new Schema({
   date: {
     type: Date,
