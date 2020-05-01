@@ -539,7 +539,7 @@ paths:
         500:
           description: Internal Server Error
 
-  /invite:
+  /invites:
     get:
       description: Returns an invite code. Valid for 2 hours. Can be consumed by one user. 
       tags:

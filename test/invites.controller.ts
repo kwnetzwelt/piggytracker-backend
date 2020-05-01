@@ -25,7 +25,7 @@ describe('Invites', () => {
 
         let invite = new Invite();
         await request(Server)
-            .get(`/api/v1/invite/`)
+            .get(`/api/v1/invites`)
             .set('Authorization', 'bearer ' + runData.token)
             .send()
             .expect(HttpStatus.OK)
@@ -47,7 +47,7 @@ describe('Invites', () => {
     async function consumeInvite(rundata: RunData,invite:IInviteModel) {
         let response = new User();
         await request(Server)
-            .post(`/api/v1/invite/`)
+            .post(`/api/v1/invites`)
             .set('Authorization', 'bearer ' + rundata.token)
             .send({"code" : invite.code})
             .expect(HttpStatus.OK)
@@ -77,7 +77,7 @@ describe('Invites', () => {
         const invite = await createInvite(rundata1);
 
         await request(Server)
-        .post(`/api/v1/invite/`)
+        .post(`/api/v1/invites`)
         .set('Authorization', 'bearer ' + rundata1.token)
         .send({"code" : invite.code})
         .expect(HttpStatus.CONFLICT)
@@ -112,7 +112,7 @@ describe('Invites', () => {
         await consumeInvite(rundata2,invite);
 
         await request(Server)
-            .post(`/api/v1/invite/`)
+            .post(`/api/v1/invites`)
             .set('Authorization', 'bearer ' + rundata3.token)
             .send({"code" : invite.code})
             .expect(HttpStatus.NOT_FOUND);
@@ -126,7 +126,7 @@ describe('Invites', () => {
         await consumeInvite(rundata2,invite);
         
         await request(Server)
-            .delete(`/api/v1/invite/`)
+            .delete(`/api/v1/invites`)
             .set('Authorization', 'bearer ' + rundata2.token)
             .send()
             .expect(HttpStatus.OK);

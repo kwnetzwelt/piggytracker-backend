@@ -35,12 +35,14 @@ export interface UserProfile {
   fullname: string;
   username: string;
   group: string;
+  id: string;
 }
 
 export function toProfile(user: IUserModel): UserProfile {
   return {
     fullname: user.fullname,
     username: user.username,
-    group: (user.groupId && user.groupId.length > 0) ? user.groupId : String(user._id)
+    group: (user.groupId && user.groupId.length > 0) ? user.groupId : String(user._id),
+    id: user._id
   }
 }
