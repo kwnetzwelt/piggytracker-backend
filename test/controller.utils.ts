@@ -16,6 +16,8 @@ export interface RunData {
     entry?: EntryCreateOrUpdateModel,
     targetId?: string,
     target?: TargetCreateOrUpdateModel,
+    groupId?:string,
+    groupName?:string
 }
 
 export async function initDatabase() {
@@ -56,6 +58,8 @@ export async function loginUser(rundata?: RunData) {
                 .to.be.an('object')
                 .that.has.property('token');
             rundata.token = r.body.token;
+            rundata.user.groupId = r.body.userProfile.groupId;
+            rundata.user.groupName = r.body.userProfile.groupName;
         });
     return rundata;
 }

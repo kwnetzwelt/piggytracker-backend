@@ -35,7 +35,7 @@ export class Controller {
             const perPage = Math.max(0, Math.min(5000, parseInt(req.query.perPage as string)));
             const page = Math.max(1, parseInt(req.query.page as string));
 
-            const result = await TargetsService.all((req.user as UserProfile).group, perPage, page);
+            const result = await TargetsService.all((req.user as UserProfile).groupId, perPage, page);
             const response: PagingResult<ResponseModel> = {
                 data: result.data.map(Controller.toResponseBody),
                 total: result.total,
@@ -51,7 +51,7 @@ export class Controller {
     async create(req: Request, res: Response, next: NextFunction) {
         try {
             const fields = req.body;
-            fields.fromUser = (req.user as UserProfile).group
+            fields.fromUser = (req.user as UserProfile).groupId
 
             const doc = await TargetsService.create(req.body);
 
@@ -64,7 +64,7 @@ export class Controller {
 
     async byId(req: Request, res: Response, next: NextFunction) {
         try {
-            const doc = await targetsService.byId(req.params.id, (req.user as UserProfile).group);
+            const doc = await targetsService.byId(req.params.id, (req.user as UserProfile).groupId);
             return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc));
         }
         catch (err) {
@@ -75,7 +75,7 @@ export class Controller {
     async patch(req: Request, res: Response, next: NextFunction) {
         try {
             const fields = Controller.extractWriteableFieldsFromRequestBody(req);
-            const doc = await targetsService.patch(req.params.id, (req.user as UserProfile).group, fields);
+            const doc = await targetsService.patch(req.params.id, (req.user as UserProfile).groupId, fields);
             return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc));
         }
         catch (err) {
@@ -85,7 +85,7 @@ export class Controller {
 
     async remove(req: Request, res: Response, next: NextFunction) {
         try {
-            const doc = await targetsService.remove(req.params.id, (req.user as UserProfile).group);
+            const doc = await targetsService.remove(req.params.id, (req.user as UserProfile).groupId);
             return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc as any));
         }
         catch (err) {
