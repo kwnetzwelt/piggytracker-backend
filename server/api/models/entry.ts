@@ -22,6 +22,7 @@ export interface IEntryModel extends mongoose.Document {
   changed: Date;
   dummy: boolean;
   fromUser: string;
+  deleted: boolean;
 }
 
 export interface EntryArrayResponse {
@@ -56,6 +57,10 @@ const schema = new Schema({
   },
   dummy: Boolean,
   fromUser: String,
+  deleted: {
+    type: Boolean,
+    default: false
+  },
 }, { timestamps: true });
 
 export const Entry = mongoose.model<IEntryModel>("bill", schema);

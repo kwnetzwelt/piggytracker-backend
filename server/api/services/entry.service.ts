@@ -20,8 +20,7 @@ export class EntrysService {
     L.info('fetch all entries');
 
     const docs = await Entry
-      .find({ fromUser })
-      .sort([["date", -1]])
+      .find({ fromUser,deleted: false })
       .skip((page - 1) * perPage)
       .limit(perPage)
       .lean()
@@ -40,7 +39,7 @@ export class EntrysService {
     }
 
     const doc = await Entry
-      .findOne({ _id: id, fromUser })
+      .findOne({ _id: id, fromUser,deleted: false })
       .lean()
       .exec() as IEntryModel;
 
@@ -76,9 +75,8 @@ export class EntrysService {
     L.info(`delete Entry with id ${id}`);
 
     const doc = await Entry
-      .findOneAndRemove({ _id: id, fromUser })
-      .lean()
-      .exec();
+      .findOneAndUpdate({ _id: id, fromUser,deleted: false }, {deleted: true}, {new:true})
+      .exec() as IEntryModel;
 
     if (!doc) throw new errors.HttpError(HttpStatus.NOT_FOUND);
 
