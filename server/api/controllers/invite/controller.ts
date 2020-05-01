@@ -1,4 +1,4 @@
-import InviteService from '../../services/entry.service';
+import InvitesService from '../../services/invite.service';
 import { Request, Response, NextFunction } from 'express';
 import * as HttpStatus from 'http-status-codes';
 import { UserProfile } from '../../models/user';
@@ -8,14 +8,14 @@ export class Controller {
 
   
   async consume(req:Request, res:Response, next:NextFunction) {
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+      res.status(HttpStatus.NOT_IMPLEMENTED);
   }
   async create(req: Request, res: Response, next: NextFunction) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+    res.status(HttpStatus.NOT_IMPLEMENTED);
   }
 
   async remove(req: Request, res: Response, next: NextFunction) {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR);
+    res.status(HttpStatus.NOT_IMPLEMENTED);
   }
 
 }
