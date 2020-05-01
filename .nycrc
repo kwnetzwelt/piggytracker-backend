@@ -1,0 +1,12 @@
+{
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "all": true,
+    "reporter": [
+        "html",
+        "text",
+        "text-summary"
+    ],
+    "include": [
+        "server/**/*"
+    ]
+}

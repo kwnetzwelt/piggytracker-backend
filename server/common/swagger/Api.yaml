@@ -1,0 +1,651 @@
+swagger: "2.0"
+info:
+  version: 1.0.0
+  title: Piggi
+  description: Piggi Frontend API
+basePath: /api/v1
+tags:
+  - name: Authenticated
+    description: Available when logged in with valid jwt token
+  - name: Authentication
+    description: Available without a valid jwt token
+  - name: Specification
+    description: The swagger API specification
+  - name: Targets
+    description: Per month and category budgets
+  - name: Invites
+    description: Group users and share the data
+  - name: Entries
+    description: Spending money
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+definitions:
+  PaginatedEntries:
+    type: object
+    title: paginated entries
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/EntryItem"
+      page:
+        type: number
+        format: integer
+        description: page contained in the answer
+      total:
+        type: number
+        format: integer
+        description: Total amount of entries 
+  PaginatedTargets:
+    type: object
+    title: paginated targets
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/TargetTotalItem"
+      page:
+        type: number
+        format: integer
+        description: page contained in the answer
+      total:
+        type: number
+        format: integer
+        description: Total amount of entries 
+  TargetTotalItem:
+    type: object
+    title: TargetTotalItem
+    properties:
+      category:
+        type: string
+        description: The name of the category
+        example: "car"
+      value:
+        type: number
+        format: digit
+        description: The amount that is targeted in this category
+  EntryItem:
+    type: object
+    title: entry
+    properties:
+      date:
+        type: string
+        format: date
+      value:
+        type: number
+        format: float
+        example: 147.87
+        minimum: 0
+      remunerator:
+        type: string
+        example: "Jane Doe"
+      category:
+        type: string
+        example: car
+      info:
+        type: string
+        default: ""
+        example: "new wheels"
+      updatedAt:
+        type: string
+        format: date
+      createdAt:
+        type: string
+        format: date
+      deletedAt:
+        type: string
+        format: date
+  InviteDetails:
+    type: object
+    title: an invite object
+    required:
+      - expires
+      - fromUser
+      - code
+    properties:
+      expires:
+        type: string
+        format: date-time
+      fromUser:
+        type: string
+      code:
+        type: string
+      
+  TargetsResult:
+    type: object
+    title: target colleciton
+    required:
+      - data
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/AddTargetResult"
+  AddTargetResult:
+    type: object
+    title: target
+    required:
+      - totals
+      - tid
+      - fromUser
+    properties:
+      _id:
+        type: string
+        format: id
+      totals:
+        type: array
+        items:
+          $ref: "#/definitions/TargetTotalItem"
+      fromUser:
+        type: string
+      tid:
+        type: number
+        description: Target Identifier 
+      updatedAt:
+        type: string
+        format: date
+      createdAt:
+        type: string
+        format: date
+      deletedAt:
+        type: string
+        format: date
+  AddTargetBody:
+    type: object
+    title: target
+    required:
+      - totals
+      - tid
+    properties:
+      totals:
+        type: array
+        items:
+          $ref: "#/definitions/TargetTotalItem"
+      tid:
+        type: number
+        description: Target Identifier 
+  PutTargetBody:
+    type: object
+    title: target
+    properties:
+      totals:
+        type: array
+        items:
+          $ref: "#/definitions/TargetTotalItem"
+      tid:
+        type: number
+        description: Target Identifier 
+  AddEntryResult:
+    type: object
+    title: entry
+    required:
+      - date
+      - value
+      - renumerator
+      - category
+      - info
+    properties:
+      _id:
+        type: string
+        format: id
+      date:
+        type: string
+        format: date
+      value:
+        type: number
+        format: float
+        example: 147.87
+        minimum: 0
+      remunerator:
+        type: string
+        example: "Jane Doe"
+      category:
+        type: string
+        example: car
+      info:
+        type: string
+        default: ""
+        example: "new wheels"
+  AddEntryBody:
+    type: object
+    title: entry
+    properties:
+      date:
+        type: string
+        format: date
+      value:
+        type: number
+        format: float
+        example: 147.87
+        minimum: 0
+        default: 0
+      remunerator:
+        type: string
+        example: "Jane Doe"
+      category:
+        type: string
+        example: car
+      info:
+        type: string
+        default: ""
+        example: "new wheels"
+  ConsumeInviteBody:
+    type: object
+    title: invite
+    properties:
+      code:
+        type: string
+        default: "abdefghhj"
+  LoginBody:
+    type: object
+    title: login credentials
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+  LoginSuccessfulResponse:
+    type: object
+    title: Login was successful
+    properties:
+      message:
+        type: string
+        example: ok
+      token:
+        type: string
+      userprofile:
+        type: object
+  UserDetails:
+    type: object
+    title: Details of the current user
+    properties:
+      username:
+        type: string
+      fullname:
+        type: string
+  MessageResponse:
+    type: object
+    title: A simple message
+    properties:
+      message:
+        type: string
+        example: ok
+
+paths:
+  /bills:
+    get:
+      tags:
+        - Authenticated
+        - Entries
+      description: Get all bills
+      parameters:
+        - name: perPage
+          in: query
+          description: provide pagination options of how many entries should be returned per page
+          required: false
+          type: "number"
+          default: 20
+          minimum: 1
+        - name: page
+          in: query
+          description: provide pagination options of the page number that should be returned. Counting starts at one.
+          required: false
+          type: "number"
+          minimum: 1
+        - name: updatedAt
+          in: query
+          description: if present will return all entries where updatedAt field is greater than provided value. 
+          required: false
+          type: "string"
+          format: "date"
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: "#/definitions/PaginatedEntries"
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
+    post:
+      description: Add a bill
+      tags:
+        - Authenticated
+        - Entries
+      parameters:
+        - name: entry
+          in: body
+          description: an entry
+          required: false
+          schema: 
+            $ref: "#/definitions/AddEntryBody"
+      responses:
+        200:
+          description: created
+          schema:
+            $ref: "#/definitions/AddEntryResult"
+        400:
+          description: Malformed request.
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
+  /bills/{id}:
+    delete:
+      description: Delete an entry. 
+      tags:
+        - Authenticated
+        - Entries
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: document id of this entry
+      responses:
+        200:
+          description: The deleted entry
+          schema:
+            $ref: "#/definitions/AddEntryResult"
+        401:
+          description: Unauthorized.
+        404:
+          description: The item does not exist or the authenticated user is not allowed to view it.
+        500:
+          description: Internal Server Error
+    get:
+      description: Returns the contents of an entry. 
+      tags:
+        - Authenticated
+        - Entries
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: document id of this entry
+      responses:
+        200:
+          description: The requested entry
+          schema:
+            $ref: "#/definitions/AddEntryResult"
+        400:
+          description: Malformed request.
+        401:
+          description: Unauthorized.
+        404:
+          description: The item does not exist or the authenticated user is not allowed to view it.
+        500:
+          description: Internal Server Error
+    put:
+      description: Updates the contents of an entry. 
+      tags:
+        - Authenticated
+        - Entries
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: Entry id of this entry
+        - name: data
+          in: body
+          schema: 
+            $ref: "#/definitions/AddEntryBody"
+      responses:
+        200:
+          description: The updated entry
+          schema:
+            $ref: "#/definitions/AddEntryResult"
+        400:
+          description: Malformed request.
+        401:
+          description: Unauthorized.
+        404:
+          description: The item does not exist or the authenticated user is not allowed to update it.
+        500:
+          description: Internal Server Error
+
+  /targets:
+    post:
+      description: Add a target
+      tags:
+        - Authenticated
+        - Targets
+      parameters:
+        - name: entry
+          in: body
+          description: a new target entry
+          required: true
+          schema: 
+            $ref: "#/definitions/AddTargetBody"
+      responses:
+        200:
+          description: created
+          schema:
+            $ref: "#/definitions/AddTargetResult"
+        400:
+          description: Bad request, e.g. the tid already exists.
+        401:
+          description: Unauthorized.
+        500:
+          description: Internal Server Error
+    get:
+      tags:
+        - Authenticated
+        - Targets
+      description: Get all targets
+      parameters:
+        - name: perPage
+          in: query
+          description: provide pagination options of how many entries should be returned per page
+          required: false
+          type: "number"
+          default: 20
+          minimum: 1
+        - name: page
+          in: query
+          description: provide pagination options of the page number that should be returned. Counting starts at one.
+          required: false
+          type: "number"
+          minimum: 1
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: "#/definitions/PaginatedTargets"
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
+  /targets/{id}:
+    delete:
+      description: Delete a target. 
+      tags:
+        - Authenticated
+        - Targets
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: document id of this target
+      responses:
+        200:
+          description: The deleted target
+          schema:
+            $ref: "#/definitions/AddTargetResult"
+        401:
+          description: Unauthorized
+        404:
+          description: The item does not exist or the authenticated user is not allowed to update it.
+        500:
+          description: Internal Server Error
+    get:
+      description: Returns the contents of a target. 
+      tags:
+        - Authenticated
+        - Targets
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: document id of this target
+      responses:
+        200:
+          description: The requested target
+          schema:
+            $ref: "#/definitions/AddTargetResult"
+        401:
+          description: Unauthorized
+        404:
+          description: The item does not exist or the authenticated user is not allowed to view it.
+        500:
+          description: Internal Server Error
+    put:
+      description: Updates the contents of a target. 
+      tags:
+        - Authenticated
+        - Targets
+      parameters:
+        - name: id
+          type: string
+          in: path
+          required: true
+          description: Entry id of this target
+        - name: data
+          in: body
+          schema: 
+            $ref: "#/definitions/PutTargetBody"
+      responses:
+        200:
+          description: The updated target
+          schema:
+            $ref: "#/definitions/AddTargetResult"
+        400:
+          description: Malformed request.
+        401:
+          description: Unauthorized
+        404:
+          description: The item does not exist or the authenticated user is not allowed to update it.
+        500:
+          description: Internal Server Error
+
+  /invite:
+    get:
+      description: Returns an invite code. Valid for 2 hours. Can be consumed by one user. 
+      tags:
+        - Authenticated
+        - Invites
+      responses:
+        200:
+          description: The requested target
+          schema:
+            $ref: "#/definitions/InviteDetails"
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
+    delete:
+      description: Deletes group invite (membership in this case) on the currently logged in user
+      tags:
+        - Authenticated
+        - Invites
+      responses:
+        200:
+          description: Returns updated user details
+          schema:
+            $ref: "#/definitions/UserDetails"
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error
+    post:
+      description: Consumes an invite
+      tags:
+        - Authenticated
+        - Invites
+      parameters:
+        - name: code
+          in: body
+          required: true
+          description: InviteCode
+          schema: 
+            $ref: "#/definitions/ConsumeInviteBody"
+      responses:
+        200:
+          description: updated user details
+          schema:
+            $ref: "#/definitions/UserDetails"
+        400:
+          description: Malformed request.
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error (e.g. expired invite code)
+
+  /login:
+    get:
+      tags:
+        - Authenticated
+      description: Get user details
+      responses:
+        200:
+          description: ok
+          schema:
+            $ref: '#/definitions/UserDetails'
+        401:
+          description: Unauthorized
+        500:
+          description: Internal Server Error (e.g. expired invite code)
+    post:
+      tags:
+        - Authentication
+      description: Login with credentials
+      parameters:
+        - name: credentials
+          in: body
+          description: user credentials
+          required: true
+          schema: 
+            $ref: '#/definitions/LoginBody'
+      responses:
+        200:
+          description: login successful
+          schema:
+            $ref: '#/definitions/LoginSuccessfulResponse'
+        401:
+          description: login failed
+        500:
+          description: Internal Server Error (e.g. expired invite code)
+
+  /logout:
+    post:
+      tags:
+        - Authenticated
+      description: Logout with credentials
+      responses:
+        200:
+          description: login successful
+          schema:
+            $ref: '#/definitions/MessageResponse'
+        401:
+          description: logout failed
+        500:
+          description: Internal Server Error (e.g. expired invite code)
+
+  /spec:
+    get:
+      tags:
+        - Specification
+      responses:
+        200:
+          description: Return the API specification
