@@ -7,6 +7,7 @@ cache:
     paths:
     - dist
     - node_modules
+    - coverage
 
 stages:
   - build
@@ -51,12 +52,16 @@ coverage:
     - eval $(ssh-agent -s)
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" | ssh-add -
-    - scp  -r build/* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    - scp -r build/* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    # Trigger service restart
+    - date > deploy-time.txt
+    - scp deploy-time.txt $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_TRIGGER
 
 upload-prod:
   <<: *upload_template
   variables:
     DEPLOY_PATH: $DEPLOY_PATH_PROD
+    DEPLOY_TRIGGER: $DEPLOY_TRIGGER_PROD
   only:
     - tags
 
@@ -64,6 +69,7 @@ upload-preview:
   <<: *upload_template
   variables:
     DEPLOY_PATH: $DEPLOY_PATH_PREVIEW
+    DEPLOY_TRIGGER: $DEPLOY_TRIGGER_PREVIEW
   only:
     refs:
       - master
