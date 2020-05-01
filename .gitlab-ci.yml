@@ -52,7 +52,7 @@ coverage:
     - eval $(ssh-agent -s)
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
     - echo "$SSH_PRIVATE_KEY" | ssh-add -
-    - scp -r build/* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
+    - scp -r dist/* $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
     # Trigger service restart
     - date > deploy-time.txt
     - scp deploy-time.txt $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_TRIGGER
