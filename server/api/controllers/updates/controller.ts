@@ -8,7 +8,7 @@ export class Controller {
 
   async all(req: Request, res: Response, next: NextFunction) {
     try {
-      const delta = Math.min(Math.max(0,parseInt(String(req.query.updatedMillisecondsAgo))),2*60*1000);
+      const delta = Math.min(Math.max(0,parseInt(String(req.query.updatedMillisecondsAgo))),24*60*60*1000);
       const updatedAt = new Date(new Date().getTime() - delta);
       const result = await EntryService.updated((req.user as UserProfile).groupId,updatedAt);
       const response: EntryArrayResponse = {data: result};
