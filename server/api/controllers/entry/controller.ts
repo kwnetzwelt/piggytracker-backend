@@ -47,18 +47,7 @@ export class Controller {
       return next(err);
     }
   }
-  async updated(req: Request, res: Response, next: NextFunction) {
-    try {
-      const delta = Math.min(Math.max(0,parseInt(String(req.query.updatedMillisecondsAgo))),2*60*1000);
-      const updatedAt = new Date(new Date().getTime() - delta);
-      const result = await EntryService.updated((req.user as UserProfile).groupId,updatedAt);
-      const response: EntryArrayResponse = {data: result};
-      return res.status(HttpStatus.OK).json(response);
-    }
-    catch (err) {
-      return next(err);
-    }
-  }
+  
   async byId(req: Request, res: Response, next: NextFunction) {
     try {
       const doc = await EntryService.byId(req.params.id, (req.user as UserProfile).groupId);

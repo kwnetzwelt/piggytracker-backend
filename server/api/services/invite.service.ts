@@ -17,20 +17,7 @@ export class InvitesService {
     return Promise.reject();
   }
 
-  async consume(id: string, fromUser: string, InviteData: IInviteModel): Promise<IInviteModel> {
-    /*L.info(`update Invite with id ${id} with data ${InviteData}`);
-
-    const doc = await Invite
-      .findOneAndUpdate({ _id: id, fromUser }, { $set: InviteData }, { new: true })
-      .lean()
-      .exec() as IInviteModel;
-
-    if (!doc) throw new errors.HttpError(HttpStatus.NOT_FOUND);
-    return doc;
-    */
-   return Promise.reject();
-  }
-
+  
   /**
    * Deletes an invite with the given code and provided the fromUser field is correct. 
    * @param code 

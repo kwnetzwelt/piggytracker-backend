@@ -60,6 +60,15 @@ describe('Entry', () => {
                     .of.length(1);
             });
     });
+    it('errors on invalid millisecond value', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        await request(Server)
+            .get('/api/v1/updates')
+            .query({ updatedMillisecondsAgo: "thisisastring"})
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.BAD_REQUEST);
+            
+    });
     it('does not return old entries', async () => {
         const rundata = await loginUserAndCreateEntry();
         await request(Server)
