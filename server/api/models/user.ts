@@ -11,6 +11,8 @@ export interface IUserModel extends mongoose.Document {
   avatarUrl?: string;
   groupId?: string;
   groupName?: string;
+  provider?: string;
+  oauthId?: string;
 }
 
 const schema = new Schema({
@@ -20,12 +22,14 @@ const schema = new Schema({
   avatarUrl: String,
   groupId: String,
   groupName: String,
+  provider: String,
+  oauthId: String,
 });
 
 export const User = mongoose.model<IUserModel>("user", schema);
 
 export function hashPassword(password: string) {
-  const hash = createHmac('sha256', process.env.PWD_SALT)
+  const hash = createHmac('sha256', process.env.JWT_KEY)
     .update(password)
     .digest('hex');
   return hash.trim();
