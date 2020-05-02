@@ -38,13 +38,17 @@ export function hashPassword(password: string) {
 export interface UserProfile {
   fullname: string;
   username: string;
-  group: string;
+  groupId: string;
+  groupName: string;
+  id: string;
 }
 
 export function toProfile(user: IUserModel): UserProfile {
   return {
     fullname: user.fullname,
     username: user.username,
-    group: (user.groupId && user.groupId.length > 0) ? user.groupId : String(user._id)
+    groupId: (user.groupId && user.groupId.length > 0) ? user.groupId : String(user._id),
+    groupName: (user.groupName && user.groupName.length > 0) ? user.groupName : String(user.fullname),
+    id: String(user._id)
   }
 }

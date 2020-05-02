@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 export interface CreateOrUpdateModel {
+  fromUser: string;
+  expires: Date;
   code: string;
 }
 

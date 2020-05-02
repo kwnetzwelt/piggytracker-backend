@@ -13,7 +13,6 @@ export interface CreateOrUpdateModel {
 export interface ResponseModel extends CreateOrUpdateModel {
   _id: string;
 }
-
 export interface IEntryModel extends mongoose.Document {
   date: Date;
   value: number;
@@ -23,8 +22,12 @@ export interface IEntryModel extends mongoose.Document {
   changed: Date;
   dummy: boolean;
   fromUser: string;
+  deleted: boolean;
 }
 
+export interface EntryArrayResponse {
+  data: IEntryModel[];
+}
 const schema = new Schema({
   date: {
     type: Date,
@@ -54,6 +57,10 @@ const schema = new Schema({
   },
   dummy: Boolean,
   fromUser: String,
+  deleted: {
+    type: Boolean,
+    default: false
+  },
 }, { timestamps: true });
 
 export const Entry = mongoose.model<IEntryModel>("bill", schema);
