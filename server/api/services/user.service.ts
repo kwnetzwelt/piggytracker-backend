@@ -1,36 +1,43 @@
 import L from '../../common/logger'
+import * as HttpStatus from 'http-status-codes';
+import * as errors from '../../common/errors';
 import { IUserModel, User } from "../models/user";
 import { MongoError } from 'mongodb';
 
 interface GoogleOAuth2Profile {
-  provider: string;
-  id: string;
-  displayName: string;
-  emails: {value: string}[];
+  /** Google User Id */
+  sub: string;
+  /** Google full name */
+  name?: string;
+  email?: string;
+}
+
+export enum OAuthProvider {
+  Google = "google",
 }
 
 export class UserService {
-  async findOrCreate(profile: GoogleOAuth2Profile, callback: (err: any, user: any) => any) {
+  async findOrCreate(provider: OAuthProvider, profile: GoogleOAuth2Profile) {
     const existingUser = await User
-    .findOne({ provider: profile.provider, oauthId: profile.id })
+    .findOne({ provider: provider.toString(), oauthId: profile.sub })
     .lean()
     .exec() as IUserModel;
 
-    if (existingUser) return callback(null, existingUser);
+    if (existingUser) return existingUser;
 
     const user = new User({
-      username: profile.emails[0].value,
-      fullname: profile.displayName,
+      username: profile.email,
+      fullname: profile.name,
       password: null,
-      provider: profile.provider,
-      oauthId: profile.id
+      provider: provider.toString(),
+      oauthId: profile.sub
     });
     const newUser = await user.save().catch((err: MongoError) => {
       L.error(err);
-      return callback(err, null);
+      throw new errors.HttpError(HttpStatus.BAD_REQUEST, err);
     }) as IUserModel;
 
-    if (newUser) return callback(null, newUser);
+    if (newUser) return newUser;
   }
 
   async findById(id: string): Promise<IUserModel> {

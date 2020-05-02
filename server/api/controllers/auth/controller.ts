@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import * as HttpStatus from 'http-status-codes';
-import UserService from '../../services/user.service';
+import UserService, { OAuthProvider } from '../../services/user.service';
 import { hashPassword, toProfile, IUserModel } from '../../../api/models/user';
 import { sign } from 'jsonwebtoken';
 import passport from 'passport';
+import { OAuth2Client as GoogleClient } from 'google-auth-library';
 
 export class Controller {
     private static generateTokenResponseObject(user: IUserModel) {
@@ -13,24 +14,24 @@ export class Controller {
         return { message: "ok", token: token, userProfile: userProfile };
     }
     private static generateTokenResponse(res: Response, user: IUserModel) {
-        
+
         res.json(Controller.generateTokenResponseObject(user));
     }
 
-    async oauthCallbackGoogle(req: Request, res: Response, next: NextFunction) {
-        passport.authenticate('google', function (err, user, info, status) {
-            if (err) { return next(err) }
-            if (!user) { return res.redirect('/signin') }
-            const data = Controller.generateTokenResponseObject(user);
-            const dataStr = JSON.stringify(data);
-            const html = `<!DOCTYPE html>\n<html>\n<body>Auth ok</body>\n<script>parent.postMessage(${dataStr},"*");</script>\n</html>`;
-            res.writeHead(200, {
-                'Content-Type': 'text/html',
-                'Content-Length': html.length,
-                'Expires': new Date().toUTCString()
-              });
-              res.end(html);
-        })(req, res, next);
+    async tokenSignInGoogle(req: Request, res: Response, next: NextFunction) {
+        const client = new GoogleClient(process.env.GOOGLE_CLIENT_ID);
+        async function verify() {
+            const ticket = await client.verifyIdToken({
+                idToken: req.body.idtoken,
+                audience: process.env.GOOGLE_CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+                // Or, if multiple clients access the backend:
+                //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+            });
+            const payload = ticket.getPayload();
+            const user = await UserService.findOrCreate(OAuthProvider.Google, payload);
+            Controller.generateTokenResponse(res, user);
+        }
+        verify().catch(error => res.status(HttpStatus.BAD_REQUEST).send(error))
     }
 
     async login(request: Request, response: Response) {

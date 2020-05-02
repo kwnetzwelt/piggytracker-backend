@@ -10,6 +10,5 @@ export const logoutRouter = express.Router()
     .post('/', controller.logout)
     ;
 export const oauthRouter = express.Router()
-    .get('/auth/google', passport.authenticate('google', { scope: ['email', 'profile'] }))
-    .get('/auth/google/callback', controller.oauthCallbackGoogle)
+    .post('/google/tokensignin', controller.tokenSignInGoogle)
     ;
