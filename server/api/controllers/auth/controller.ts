@@ -6,18 +6,30 @@ import { sign } from 'jsonwebtoken';
 import passport from 'passport';
 
 export class Controller {
-    private static generateTokenResponse(res: Response, user: IUserModel) {
+    private static generateTokenResponseObject(user: IUserModel) {
         const userProfile = toProfile(user);
         const payload = { id: user._id };
         const token = sign(payload, process.env.JWT_KEY);
-        res.json({ message: "ok", token: token, userProfile: userProfile });
+        return { message: "ok", token: token, userProfile: userProfile };
+    }
+    private static generateTokenResponse(res: Response, user: IUserModel) {
+        
+        res.json(Controller.generateTokenResponseObject(user));
     }
 
     async oauthCallbackGoogle(req: Request, res: Response, next: NextFunction) {
         passport.authenticate('google', function (err, user, info, status) {
             if (err) { return next(err) }
             if (!user) { return res.redirect('/signin') }
-            Controller.generateTokenResponse(res, user);
+            const data = Controller.generateTokenResponseObject(user);
+            const dataStr = JSON.stringify(data);
+            const html = `<!DOCTYPE html>\n<html>\n<body>Auth ok</body>\n<script>parent.postMessage(${dataStr},"*");</script>\n</html>`;
+            res.writeHead(200, {
+                'Content-Type': 'text/html',
+                'Content-Length': html.length,
+                'Expires': new Date().toUTCString()
+              });
+              res.end(html);
         })(req, res, next);
     }
 

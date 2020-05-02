@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Skeleton OAuth login</title>
+    <script src="https://code.jquery.com/jquery-3.5.0.min.js"></script>
+</head>
+
+<body>
+    <button type="button" onclick="startLogin();">Start login with Google</button><br />
+    <div id="auth">Click start</div>
+
+    <script>
+        function startLogin() {
+            console.log("Cleanup");
+            $('#auth').html('<iframe height="500" width="500" src="http://localhost:3000/auth/google"></iframe>');
+        }
+
+        window.addEventListener("message", function (event) {
+            console.log("Event received", event);
+            if (event.data) {
+                console.log("Token", event.data.token);
+                console.log("User profile", event.data.userProfile);
+            }
+        });
+    </script>
+</body>
+
+</html>
