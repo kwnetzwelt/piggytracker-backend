@@ -9,8 +9,10 @@ export interface IUserModel extends mongoose.Document {
   fullname: string;
   password: string;
   avatarUrl?: string;
-  groupId: string;
-  groupName: string;
+  groupId?: string;
+  groupName?: string;
+  provider?: string;
+  oauthId?: string;
 }
 
 const schema = new Schema({
@@ -20,12 +22,14 @@ const schema = new Schema({
   avatarUrl: String,
   groupId: String,
   groupName: String,
+  provider: String,
+  oauthId: String,
 });
 
 export const User = mongoose.model<IUserModel>("user", schema);
 
 export function hashPassword(password: string) {
-  const hash = createHmac('sha256', process.env.PWD_SALT)
+  const hash = createHmac('sha256', process.env.JWT_KEY)
     .update(password)
     .digest('hex');
   return hash.trim();
@@ -36,6 +40,7 @@ export interface UserProfile {
   username: string;
   groupId: string;
   groupName: string;
+  avatarUrl: string;
   id: string;
 }
 
@@ -45,6 +50,7 @@ export function toProfile(user: IUserModel): UserProfile {
     username: user.username,
     groupId: (user.groupId && user.groupId.length > 0) ? user.groupId : String(user._id),
     groupName: (user.groupName && user.groupName.length > 0) ? user.groupName : String(user.fullname),
+    avatarUrl: user.avatarUrl,
     id: String(user._id)
   }
 }

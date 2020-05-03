@@ -9,3 +9,6 @@ export const loginRouter = express.Router()
 export const logoutRouter = express.Router()
     .post('/', controller.logout)
     ;
+export const oauthRouter = express.Router()
+    .post('/google/tokensignin', controller.tokenSignInGoogle)
+    ;

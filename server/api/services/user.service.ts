@@ -1,7 +1,44 @@
 import L from '../../common/logger'
+import * as HttpStatus from 'http-status-codes';
+import * as errors from '../../common/errors';
 import { IUserModel, User } from "../models/user";
+import { MongoError } from 'mongodb';
+
+interface GoogleOAuth2Profile {
+  /** Google User Id */
+  sub: string;
+  /** Google full name */
+  name?: string;
+  email?: string;
+}
+
+export enum OAuthProvider {
+  Google = "google",
+}
 
 export class UserService {
+  async findOrCreate(provider: OAuthProvider, profile: GoogleOAuth2Profile) {
+    const existingUser = await User
+    .findOne({ provider: provider.toString(), oauthId: profile.sub })
+    .exec() as IUserModel;
+
+    if (existingUser) return existingUser;
+
+    const user = new User({
+      username: profile.email,
+      fullname: profile.name,
+      password: null,
+      provider: provider.toString(),
+      oauthId: profile.sub
+    });
+    const newUser = await user.save().catch((err: MongoError) => {
+      L.error(err);
+      throw new errors.HttpError(HttpStatus.BAD_REQUEST, err);
+    }) as IUserModel;
+
+    if (newUser) return newUser;
+  }
+
   async clearUserGroup(id: string) : Promise<IUserModel> {
     L.info(`clear user groupe for user with id ${id}`);
     const user = await User.findById(id);
