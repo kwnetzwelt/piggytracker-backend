@@ -310,6 +310,38 @@ paths:
           description: Unauthorized
         500:
           description: Internal Server Error
+  /images:
+    post:
+      description: add icons for your categories and team members. Either a category or remunerator parameter is required. 
+      consumes:
+        - multipart/form-data
+      tags:
+        - Authenticated
+      parameters:
+        - name: category
+          in: formData
+          description: a category descriptor. format does only allow values matching /[^-z0-9-]/
+          required: false
+          type: "string"
+        - name: remunerator
+          in: formData
+          description: a remunerator descriptor. format does only allow values matching /[^-z0-9-]/
+          required: false
+          type: "string"
+        - name: image
+          in: formData
+          description: the image data
+          required: true
+          type: "file"
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: "#/definitions/EntryArrayResponse"
+        400:
+          description: Format of category or remunerator descriptor not correct
+        401:
+          description: Unauthorized
   /bills:
     get:
       tags:
