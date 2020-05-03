@@ -20,7 +20,6 @@ export class UserService {
   async findOrCreate(provider: OAuthProvider, profile: GoogleOAuth2Profile) {
     const existingUser = await User
     .findOne({ provider: provider.toString(), oauthId: profile.sub })
-    .lean()
     .exec() as IUserModel;
 
     if (existingUser) return existingUser;

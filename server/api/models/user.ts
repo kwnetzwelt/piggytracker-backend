@@ -40,6 +40,7 @@ export interface UserProfile {
   username: string;
   groupId: string;
   groupName: string;
+  avatarUrl: string;
   id: string;
 }
 
@@ -49,6 +50,7 @@ export function toProfile(user: IUserModel): UserProfile {
     username: user.username,
     groupId: (user.groupId && user.groupId.length > 0) ? user.groupId : String(user._id),
     groupName: (user.groupName && user.groupName.length > 0) ? user.groupName : String(user.fullname),
+    avatarUrl: user.avatarUrl,
     id: String(user._id)
   }
 }

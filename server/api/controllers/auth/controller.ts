@@ -29,6 +29,10 @@ export class Controller {
             });
             const payload = ticket.getPayload();
             const user = await UserService.findOrCreate(OAuthProvider.Google, payload);
+            user.avatarUrl = req.body.avatarUrl;
+            await user.save();
+            
+            console.log(user.avatarUrl);
             Controller.generateTokenResponse(res, user);
         }
         verify().catch(error => res.status(HttpStatus.BAD_REQUEST).send(error))
@@ -55,6 +59,9 @@ export class Controller {
         response.send({
             username: user.username,
             fullname: user.fullname,
+            groupId: user.groupId, //TODO add to swagger and write test
+            groupName: user.groupName, //TODO add to swagger and write test
+            avatarUrl: user.avatarUrl, //TODO add to swagger and write test
         });
     }
 
