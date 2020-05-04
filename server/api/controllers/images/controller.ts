@@ -31,16 +31,16 @@ export class Controller {
             {
                 if(fields.category.match(/[^a-z0-9-]/))
                 {
-                    res.status(HttpStatus.BAD_REQUEST);
+                    res.status(HttpStatus.BAD_REQUEST).send({});
                 }
                 
                 await ImagesService.createCategoryImage(fields, (req.user as UserProfile).groupId);
             }
             else
             {
-                if(!fields.remunerator.match(/[^a-z0-9-]/))
+                if(fields.remunerator.match(/[^a-z0-9-]/))
                 {
-                    res.status(HttpStatus.BAD_REQUEST);
+                    res.status(HttpStatus.BAD_REQUEST).send({});
                 }
                 await ImagesService.createRemuneratorImage(fields, (req.user as UserProfile).groupId);
             }

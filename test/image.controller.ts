@@ -11,7 +11,7 @@ import { CreateOrUpdateModel, ResponseModel, Invite, IInviteModel } from '../ser
 import { response } from 'express';
 import { User, IUserModel } from '../server/api/models/user';
 import { HttpError } from '../server/common/errors';
-import { readFileSync, remove} from 'fs-extra';
+import { readFileSync, removeSync} from 'fs-extra';
 
 
 describe('Images', () => {
@@ -24,33 +24,9 @@ describe('Images', () => {
     });
 
     afterEach(async () => {
-        await remove("public/uploads/*");
+        removeSync("public/uploads");
     });
 
-    async function createImage(runData:RunData) {
-
-        await request(Server)
-            .get(`/api/v1/images`)
-            .set('Authorization', 'bearer ' + runData.token)
-            .send()
-            .expect(HttpStatus.OK);
-    };
-    
-    async function consumeInvite(rundata: RunData,invite:IInviteModel) : Promise<any> {
-        let response = new User();
-        await request(Server)
-            .post(`/api/v1/invites`)
-            .set('Authorization', 'bearer ' + rundata.token)
-            .send({"code" : invite.code})
-            .expect(HttpStatus.OK)
-            .then(r => {
-                expect(r.body)
-                    .to.be.an('object');
-                response = r.body;
-            });
-        
-        return response;
-    }
 
     it("can receive category image", async () => {
         const rundata1 = await loginUser();
@@ -81,9 +57,8 @@ describe('Images', () => {
             .field("category",categoryName)
             .attach('image',
                 imageFile,
-                'test.png').end((err, res) => {
-                    expect(res.status).to.equal(400);
-                });
+                'test.png')
+            .expect(400);
             
     });
 
@@ -98,11 +73,8 @@ describe('Images', () => {
             .field("category",categoryName)
             .attach('image',
                 imageFile,
-                'test.png').end((err, res) => {
-                    expect(res.status).to.equal(400);
-                }).then((res) =>{
-
-                });
+                'test.png')
+            .expect(400);
             
     });
     it("reject category description with special char", async () => {
@@ -116,9 +88,8 @@ describe('Images', () => {
             .field("category",categoryName)
             .attach('image',
                 imageFile,
-                'test.png').end((err, res) => {
-                    expect(res.status).to.equal(400);
-                });
+                'test.png')
+            .expect(400);
             
     });
 
@@ -128,21 +99,20 @@ describe('Images', () => {
 
     it("can receive remunerator image", async () => {
         const rundata1 = await loginUser();
-        const categoryName = "essen-gehen";
-        const imageFile = readFileSync('test/test.png');
+        const categoryName = "john-doe";
         await request(Server)
             .post(`/api/v1/images`)
             .set('Authorization', 'bearer ' + rundata1.token)
             .set('content-type','multipart/form-data')
             .field("remunerator",categoryName)
             .attach('image',
-                imageFile,
+            'test/test.png',
                 'test.png')
             .then((res) => {
-                    expect(res.status).to.equal(200);
-                    const targetFileName = "public/uploads/" + rundata1.user.id + "-c-" + categoryName;
-                    expect(targetFileName).to.be.a.file();
-                    const uploadedFile = readFileSync(targetFileName);
+                expect(res.status).to.equal(200);
+                const targetFileName = "public/uploads/" + rundata1.user.id + "-r-" + categoryName;
+                expect(targetFileName).to.be.a.file();
+                const uploadedFile = readFileSync(targetFileName);
             });
             
     });
@@ -157,9 +127,8 @@ describe('Images', () => {
             .field("remunerator",categoryName)
             .attach('image',
                 imageFile,
-                'test.png').end((err, res) => {
-                    expect(res.status).to.equal(400);
-                });
+                'test.png')
+            .expect(400);
             
     });
 
@@ -174,9 +143,8 @@ describe('Images', () => {
             .field("remunerator",categoryName)
             .attach('image',
                 imageFile,
-                'test.png').end((err, res) => {
-                    expect(res.status).to.equal(400);
-                });
+                'test.png')
+            .expect(400);
             
     });
     it("reject remunerator description with special char", async () => {
@@ -190,9 +158,8 @@ describe('Images', () => {
             .field("remunerator",categoryName)
             .attach('image',
                 imageFile,
-                'test.png').end((err, res) => {
-                    expect(res.status).to.equal(400);
-                });
+                'test.png')
+            .expect(400);
             
     });
     

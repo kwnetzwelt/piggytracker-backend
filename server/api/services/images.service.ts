@@ -10,7 +10,7 @@ export class ImagesService {
   }
   async createRemuneratorImage(sentData:IImageData, fromUser: string): Promise<void> {
     const uri = fromUser + "-r-" + sentData.remunerator;
-    
+    sentData.image.mv("public/uploads/" +uri );
   }
 
 }
