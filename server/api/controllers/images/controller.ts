@@ -26,6 +26,7 @@ export class Controller {
     async create(req: Request, res: Response, next: NextFunction) {
         try {
             const fields = Controller.extractWriteableFieldsFromRequest(req);
+            
             if(fields.category)
             {
                 if(fields.category.match(/[^a-z0-9-]/))
@@ -43,7 +44,7 @@ export class Controller {
                 }
                 await ImagesService.createRemuneratorImage(fields, (req.user as UserProfile).groupId);
             }
-            return res.status(HttpStatus.OK);
+            return res.status(HttpStatus.OK).json({message: "ok"});
         }
         catch (err) {
             return next(err);
