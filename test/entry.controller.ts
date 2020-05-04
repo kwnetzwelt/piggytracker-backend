@@ -58,6 +58,7 @@ describe('Entry', () => {
             .expect(HttpStatus.UNAUTHORIZED);
     });
 
+
     it('can be added with empty body when authenticated', async () => {
         const rundata = await loginUser();
 
@@ -73,6 +74,8 @@ describe('Entry', () => {
                 expect(r.body).to.have.property('date');
                 expect(r.body).to.have.property('value');
                 expect(r.body).to.have.property('category');
+                const category = r.body.category;
+                expect(category).to.equal("");
                 expect(r.body).to.have.property('info');
             });
     });
