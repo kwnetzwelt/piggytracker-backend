@@ -308,12 +308,96 @@ paths:
       responses:
         200:
           description: Success
-          schema:
-            $ref: "#/definitions/EntryArrayResponse"
         401:
           description: Unauthorized
         500:
           description: Internal Server Error
+  /images/remunerator/{remunerator}:
+    delete:
+      description: remove icons for your categories and team members. Either a category or remunerator parameter is required. 
+      tags:
+        - Authenticated
+      parameters:
+        - name: remunerator
+          in: path
+          description: a remunerator descriptor. format does only allow values matching /[^-z0-9-]/
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: Success
+        400:
+          description: Format of category or remunerator descriptor not correct
+        401:
+          description: Unauthorized
+  /images/remunerator:
+    post:
+      description: add icons for your categories and team members. Either a category or remunerator parameter is required. 
+      consumes:
+        - multipart/form-data
+      tags:
+        - Authenticated
+      parameters:
+        - name: remunerator
+          in: formData
+          description: a remunerator descriptor. format does only allow values matching /[^-z0-9-]/
+          required: false
+          type: "string"
+        - name: image
+          in: formData
+          description: the image data
+          required: true
+          type: "file"
+      responses:
+        200:
+          description: Success
+        400:
+          description: Format of category or remunerator descriptor not correct
+        401:
+          description: Unauthorized
+  /images/category/{category}:
+    delete:
+      description: remove icons for your categories.
+      tags:
+        - Authenticated
+      parameters:
+        - name: category
+          in: path
+          description: a category descriptor. format does only allow values matching /[^-z0-9-]/
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: Success
+        400:
+          description: Format of category or remunerator descriptor not correct
+        401:
+          description: Unauthorized
+  /images/category:
+    post:
+      description: add icons for your categories and team members. Either a category or remunerator parameter is required. 
+      consumes:
+        - multipart/form-data
+      tags:
+        - Authenticated
+      parameters:
+        - name: category
+          in: formData
+          description: a category descriptor. format does only allow values matching /[^-z0-9-]/
+          required: false
+          type: "string"
+        - name: image
+          in: formData
+          description: the image data
+          required: true
+          type: "file"
+      responses:
+        200:
+          description: Success
+        400:
+          description: Format of category or remunerator descriptor not correct
+        401:
+          description: Unauthorized
   /bills:
     get:
       tags:

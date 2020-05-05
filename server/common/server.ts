@@ -9,6 +9,7 @@ import swaggerify from './swagger';
 import l from './logger';
 import Mongoose from './mongoose'
 import './passport';
+import fileUpload from 'express-fileupload';
 
 const app = express();
 const mongoose = new Mongoose;
@@ -21,6 +22,7 @@ export default class ExpressServer {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(cookieParser(process.env.SESSION_SECRET));
     app.use('/static', express.static(`${root}/public`));
+    app.use(fileUpload({createParentPath: true}));
   }
 
   router(routes: (app: Application) => void): ExpressServer {
