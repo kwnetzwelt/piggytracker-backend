@@ -9,11 +9,15 @@ export class Controller {
     private static extractWriteableFieldsFromRequest(req: Request) {
         const body = (req.body || {});
         const r = {};
-        if (body.category) {
-            r['category'] = String(body.category);
+        if (req.params.category) {
+            r['category'] = String(req.params.category);
+        }else if(body.category) {
+          r['category'] = String(body.category);
         }
-        if (body.remunerator) {
-            r['remunerator'] = String(body.remunerator);
+        if (req.params.remunerator) {
+            r['remunerator'] = String(req.params.remunerator);
+        }else if(body.remunerator) {
+          r['remunerator'] = String(body.remunerator);
         }
         if(req.files.image)
         {
@@ -22,56 +26,88 @@ export class Controller {
         return r as IImageData;
     }
 
-
-    async create(req: Request, res: Response, next: NextFunction) {
-        try {
-            const fields = Controller.extractWriteableFieldsFromRequest(req);
-            
-            if(fields.category)
-            {
-                if(fields.category.match(/[^a-z0-9-]/))
-                {
-                    res.status(HttpStatus.BAD_REQUEST).send({});
-                }
-                
-                await ImagesService.createCategoryImage(fields, (req.user as UserProfile).groupId);
-            }
-            else
-            {
-                if(fields.remunerator.match(/[^a-z0-9-]/))
-                {
-                    res.status(HttpStatus.BAD_REQUEST).send({});
-                }
-                await ImagesService.createRemuneratorImage(fields, (req.user as UserProfile).groupId);
-            }
-            return res.status(HttpStatus.OK).json({message: "ok"});
-        }
-        catch (err) {
-            return next(err);
-        }
+    private static checkCategoryValid(fields: IImageData) {
+      const m = fields.category.match(/[^a-z0-9-]/);
+      return m === null;
     }
 
-  /*async byId(req: Request, res: Response, next: NextFunction) {
-    try {
+    private static checkRemuneratorValid(fields: IImageData) {
+      const m = fields.remunerator.match(/[^a-z0-9-]/);
+      return m === null;
+    }
 
-      const doc = await EntryService.byId(req.params.id, (req.user as UserProfile).groupId);
-      return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc));
+    async createCategory(req: Request, res: Response, next: NextFunction) {
+      try {
+        const fields = Controller.extractWriteableFieldsFromRequest(req);
+        
+        if(fields.category && Controller.checkCategoryValid(fields))
+        {
+          await ImagesService.createCategoryImage(fields, (req.user as UserProfile).groupId);
+          return res.status(HttpStatus.OK).json({message: "ok"});
+        }
+        else
+        {
+          return res.status(HttpStatus.BAD_REQUEST).json({message: "missing or malformated parameter"});
+        }
+      }
+      catch (err) {
+          return next(err);
+      }
+  }
+  async createRemunerator(req: Request, res: Response, next: NextFunction) {
+    try {
+        const fields = Controller.extractWriteableFieldsFromRequest(req);
+        
+        if(fields.remunerator && Controller.checkRemuneratorValid(fields))
+        {
+          await ImagesService.createRemuneratorImage(fields, (req.user as UserProfile).groupId);
+          return res.status(HttpStatus.OK).json({message: "ok"});
+        
+        }
+        else
+        {
+          return res.status(HttpStatus.BAD_REQUEST).json({message: "missing or malformated parameter"});
+        }
+    }
+    catch (err) {
+        return next(err);
+    }
+}
+
+  async removeCategory(req: Request, res: Response, next: NextFunction) {
+    try {
+      const fields = Controller.extractWriteableFieldsFromRequest(req);
+      if(fields.category && Controller.checkCategoryValid(fields))
+      {
+        await ImagesService.removeCategoryImage(fields, (req.user as UserProfile).groupId);
+        return res.status(HttpStatus.OK).json({message: "ok"});
+      }
+      else
+      {
+        return res.status(HttpStatus.BAD_REQUEST).json({message: "missing or malformated parameter"});
+      }
     }
     catch (err) {
       return next(err);
     }
   }
 
-  async remove(req: Request, res: Response, next: NextFunction) {
+  async removeRemunerator(req: Request, res: Response, next: NextFunction) {
     try {
-      const doc = await EntryService.remove(req.params.id, (req.user as UserProfile).groupId);
-      return res.status(HttpStatus.OK).json(Controller.toResponseBody(doc as any));
+      const fields = Controller.extractWriteableFieldsFromRequest(req);
+      if(fields.remunerator && Controller.checkRemuneratorValid(fields))
+      {
+        await ImagesService.removeRemuneratorImage(fields, (req.user as UserProfile).groupId);
+        return res.status(HttpStatus.OK).json({message: "ok"});
+      }else
+      {
+        return res.status(HttpStatus.BAD_REQUEST).json({message: "missing or malformated parameter"});
+      }
     }
     catch (err) {
       return next(err);
     }
-  }*/
-
+  }
 }
 
 export default new Controller();

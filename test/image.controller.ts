@@ -33,7 +33,7 @@ describe('Images', () => {
         const categoryName = "essen-gehen";
         const imageFile = readFileSync('test/test.png');
         await request(Server)
-            .post(`/api/v1/images`)
+            .post(`/api/v1/images/category`)
             .set('content-type','multipart/form-data')
             .attach('image',
             'test/test.png')
@@ -46,12 +46,28 @@ describe('Images', () => {
                 const uploadedFile = readFileSync(targetFileName);
             });
     });
+    it("reject request without category image", async () => {
+        const rundata1 = await loginUser();
+        const categoryName = "essen-gehen";
+        await request(Server)
+            .post(`/api/v1/images/category`)
+            .set('content-type','multipart/form-data')
+            .attach('image',
+            '')
+            .field("category",categoryName)
+            .set('Authorization', 'bearer ' + rundata1.token)
+            .then((res) => {
+                expect(res.status).to.equal(400);
+                const targetFileName = "public/uploads/" + rundata1.user.id + "-c-" + categoryName;
+                expect(targetFileName).not.to.be.a.path();
+            });
+    });
     it("reject category description with whitespace", async () => {
         const rundata1 = await loginUser();
         const categoryName = "essen gehen ";
         const imageFile = readFileSync('test/test.png');
         await request(Server)
-            .post(`/api/v1/images`)
+            .post(`/api/v1/images/category`)
             .set('Authorization', 'bearer ' + rundata1.token)
             .set('content-type','multipart/form-data')
             .field("category",categoryName)
@@ -67,7 +83,7 @@ describe('Images', () => {
         const categoryName = "Essen-gehen";
         const imageFile = readFileSync('test/test.png');
         await request(Server)
-            .post(`/api/v1/images`)
+            .post(`/api/v1/images/category`)
             .set('Authorization', 'bearer ' + rundata1.token)
             .set('content-type','multipart/form-data')
             .field("category",categoryName)
@@ -81,8 +97,8 @@ describe('Images', () => {
         const rundata1 = await loginUser();
         const categoryName = "essen-gehen;";
         const imageFile = readFileSync('test/test.png');
-        request(Server)
-            .post(`/api/v1/images`)
+        await request(Server)
+            .post(`/api/v1/images/category`)
             .set('Authorization', 'bearer ' + rundata1.token)
             .set('content-type','multipart/form-data')
             .field("category",categoryName)
@@ -92,36 +108,70 @@ describe('Images', () => {
             .expect(400);
             
     });
-
+    it("can remove uploaded category image", async () => {
+        const rundata1 = await loginUser();
+        const categoryName = "essen-gehen";
+        await request(Server)
+            .post(`/api/v1/images/category`)
+            .set('Authorization', 'bearer ' + rundata1.token)
+            .set('content-type','multipart/form-data')
+            .field("category",categoryName)
+            .attach('image',
+            'test/test.png',
+                'test.png')
+            .expect(200);
+        await request(Server)
+            .delete(`/api/v1/images/category/${categoryName}`)
+            .set('Authorization', 'bearer ' + rundata1.token)
+            .expect(200);
+        const targetFileName = "public/uploads/" + rundata1.user.id + "-c-" + categoryName;
+        expect(targetFileName).to.not.be.a.path();
+    });
 
     /** remunerator */
 
 
     it("can receive remunerator image", async () => {
         const rundata1 = await loginUser();
-        const categoryName = "john-doe";
+        const remuneratorName = "john-doe";
         await request(Server)
-            .post(`/api/v1/images`)
+            .post(`/api/v1/images/remunerator`)
             .set('Authorization', 'bearer ' + rundata1.token)
             .set('content-type','multipart/form-data')
-            .field("remunerator",categoryName)
+            .field("remunerator",remuneratorName)
             .attach('image',
             'test/test.png',
                 'test.png')
             .then((res) => {
                 expect(res.status).to.equal(200);
-                const targetFileName = "public/uploads/" + rundata1.user.id + "-r-" + categoryName;
+                const targetFileName = "public/uploads/" + rundata1.user.id + "-r-" + remuneratorName;
                 expect(targetFileName).to.be.a.file();
                 const uploadedFile = readFileSync(targetFileName);
             });
             
+    });
+    it("reject request without remunerator image", async () => {
+        const rundata1 = await loginUser();
+        const remuneratorName = "john-doe";
+        await request(Server)
+            .post(`/api/v1/images/remunerator`)
+            .set('content-type','multipart/form-data')
+            .attach('image',
+            '')
+            .field("category",remuneratorName)
+            .set('Authorization', 'bearer ' + rundata1.token)
+            .then((res) => {
+                expect(res.status).to.equal(400);
+                const targetFileName = "public/uploads/" + rundata1.user.id + "-c-" + remuneratorName;
+                expect(targetFileName).not.to.be.a.path();
+            });
     });
     it("reject remunerator description with whitespace", async () => {
         const rundata1 = await loginUser();
         const categoryName = "essen gehen ";
         const imageFile = readFileSync('test/test.png');
         request(Server)
-            .post(`/api/v1/images`)
+            .post(`/api/v1/images/remunerator`)
             .set('Authorization', 'bearer ' + rundata1.token)
             .set('content-type','multipart/form-data')
             .field("remunerator",categoryName)
@@ -137,7 +187,7 @@ describe('Images', () => {
         const categoryName = "Essen-gehen";
         const imageFile = readFileSync('test/test.png');
         request(Server)
-            .post(`/api/v1/images`)
+            .post(`/api/v1/images/category`)
             .set('Authorization', 'bearer ' + rundata1.token)
             .set('content-type','multipart/form-data')
             .field("remunerator",categoryName)
@@ -152,7 +202,7 @@ describe('Images', () => {
         const categoryName = "essen-gehen;";
         const imageFile = readFileSync('test/test.png');
         request(Server)
-            .post(`/api/v1/images`)
+            .post(`/api/v1/images/category`)
             .set('Authorization', 'bearer ' + rundata1.token)
             .set('content-type','multipart/form-data')
             .field("remunerator",categoryName)
@@ -162,5 +212,25 @@ describe('Images', () => {
             .expect(400);
             
     });
-    
+
+    it("can remove uploaded remunerator image", async () => {
+        const rundata1 = await loginUser();
+        const remuneratorName = "john-doe";
+        await request(Server)
+            .post(`/api/v1/images/remunerator`)
+            .set('Authorization', 'bearer ' + rundata1.token)
+            .set('content-type','multipart/form-data')
+            .field("remunerator",remuneratorName)
+            .attach('image',
+                'test/test.png',
+                'test.png')
+            .expect(200);
+        await request(Server)
+            .delete(`/api/v1/images/remunerator/${remuneratorName}`)
+            .set('Authorization', 'bearer ' + rundata1.token)
+            .expect(HttpStatus.OK);
+        const targetFileName = "public/uploads/" + rundata1.user.id + "-c-" + remuneratorName;
+        expect(targetFileName).to.not.be.a.path();
+        
+    });
 });
