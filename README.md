@@ -11,7 +11,7 @@ Get started developing...
 npm install
 
 # run in development mode
-docker-compose -f docker-compose-dev.yml up -d
+npm run docker
 npm run dev
 
 # run tests
