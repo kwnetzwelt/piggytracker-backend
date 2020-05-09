@@ -162,7 +162,7 @@ describe('Images', () => {
             .set('Authorization', 'bearer ' + rundata1.token)
             .then((res) => {
                 expect(res.status).to.equal(400);
-                const targetFileName = "public/uploads/" + rundata1.user.id + "-c-" + remuneratorName;
+                const targetFileName = "public/uploads/" + rundata1.user.id + "-r-" + remuneratorName;
                 expect(targetFileName).not.to.be.a.path();
             });
     });
