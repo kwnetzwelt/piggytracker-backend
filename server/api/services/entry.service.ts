@@ -82,6 +82,19 @@ export class EntrysService {
 
     return doc;
   }
+  async export(fromUser: string): Promise<IEntryModel[]>
+  {
+    const docs = await Entry.
+      find({fromUser}).lean().exec() as IEntryModel[];
+    return docs;
+  }
+
+  async clearExcept( ids:string[], fromUser: string): Promise<number>
+  {
+    const allFromUser = await Entry.find({fromUser});
+    const result = await Entry.deleteMany({fromUser, _id: {$nin: ids}});
+    return result.n;
+  }
 }
 
 export default new EntrysService();

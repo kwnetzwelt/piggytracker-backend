@@ -15,8 +15,8 @@
           "--timeout",
           "999999",
           "--colors",
-          //"-g",
-          //"can clear group for user",
+          "-g",
+          "can import new entries from csv",
           "${workspaceFolder}/test/**/*.ts"
         ],
         "internalConsoleOptions": "openOnSessionStart",
