@@ -2,8 +2,11 @@ import EntryService from '../../services/entry.service';
 import { Request, Response, NextFunction } from 'express';
 import * as HttpStatus from 'http-status-codes';
 import { UserProfile } from '../../models/user';
-import { IEntryModel, ResponseModel, EntryArrayResponse } from '../../models/entry';
+import { IEntryModel, ResponseModel, CreateOrUpdateModel } from '../../models/entry';
 import { PagingResult } from '../../../common/paging.result';
+import {format as csvFormat, writeToStream} from 'fast-csv';
+import { UploadedFile } from 'express-fileupload';
+import csvtojson from 'csvtojson';
 
 export class Controller {
 
@@ -18,7 +21,7 @@ export class Controller {
     };
   }
 
-  private static extractWriteableFieldsFromRequestBody(req: Request) {
+  private static extractWriteableFieldsFromRequestBody(req: Request ) {
     const body = (req.body || {});
     return {
       date: body.date,
@@ -29,6 +32,7 @@ export class Controller {
       changed: new Date(), //TODO Needs to be removed
     } as IEntryModel;
   }
+
 
   async all(req: Request, res: Response, next: NextFunction) {
     try {
@@ -92,7 +96,58 @@ export class Controller {
       return next(err);
     }
   }
+  async export(req: Request, res: Response, next: NextFunction) {
+    try {
 
+      const filename = "export.csv";
+      const docs = await EntryService.export((req.user as UserProfile).groupId);
+
+      const transformer = (doc: IEntryModel)=> {
+        return {
+            date: doc.date.toISOString(),
+            amount: doc.value,
+            category: doc.category,
+            remunerator: doc.remunerator,
+            info: doc.info
+        };
+      }
+
+      res.setHeader('Content-disposition', `attachment; filename=${filename}`);
+      res.writeHead(200, { 'Content-Type': 'text/csv' });
+      res.flushHeaders();
+      writeToStream(res,docs,{headers: true, transform:transformer});
+
+    }catch(err)  {
+      return next(err);
+    }
+  }
+
+  async import(req: Request, res: Response, next: NextFunction) {
+    try {
+      const file = req.files['csv'] as UploadedFile;
+      const contents = file.data.toString('utf8');
+      let createdCount = 0;
+      let result = await csvtojson().fromString(contents) as CreateOrUpdateModel[];
+      const newIds = new Array<string>();
+      for (const i in result) {
+        if (result.hasOwnProperty(i)) {
+          const element = result[i];
+          const fields = Controller.extractWriteableFieldsFromRequestBody({body: element} as Request);
+          fields.fromUser = (req.user as UserProfile).groupId;
+          const newEntry = await EntryService.create(fields);
+          newIds.push(newEntry.id);
+          createdCount++;
+        }
+      }
+      if(Boolean(req.body.clear))
+      {
+        EntryService.clearExcept(newIds, (req.user as UserProfile).groupId);
+      }
+      return res.status(HttpStatus.OK).json({count:createdCount});
+    }catch(err)  {
+      return next(err);
+    }
+  }
 }
 
 export default new Controller();

@@ -8,6 +8,7 @@ import { initDatabase, dropDatabase, loginUser, RunData } from './controller.uti
 import { EntryBuilder } from './entry.builder';
 import { EntrysService } from '../server/api/services/entry.service';
 import { CreateOrUpdateModel, ResponseModel } from '../server/api/models/entry';
+import { writeFileSync, removeSync, unlinkSync } from 'fs-extra';
 
 describe('Entry', () => {
     before(async () => {
@@ -27,6 +28,7 @@ describe('Entry', () => {
             .expect(HttpStatus.OK)
             .then(r => {
                 entryId = r.body._id;
+
             });
         return entryId;
     }
@@ -465,5 +467,178 @@ describe('Entry', () => {
                     .to.be.an('array')
                     .of.lengthOf(0);
             });
+    });
+
+    it('can export all entries', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        const csvString = "date,amount,category,remunerator,info\n" 
+            + new Date(rundata.entry.date).toISOString()
+            + ","
+            + rundata.entry.value
+            + ","
+            + rundata.entry.category
+            + ","
+            + rundata.entry.remunerator
+            + ","
+            + rundata.entry.info;
+        
+        await request(Server)
+            .get('/api/v1/bills/export')
+            .set('Authorization', 'bearer ' + rundata.token)
+            .expect(HttpStatus.OK)
+            .then(r => {
+                console.log(r.text);
+                expect(r).to.have.property("text");
+                expect(r.text).to.equal(csvString);
+            });
+    });
+
+    it('can import new entries from csv', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        const entry = EntryBuilder.default();
+        const csvString = "date,amount,category,remunerator,info\n" 
+            + new Date(entry.date).toISOString()
+            + ","
+            + entry.value
+            + ","
+            + entry.category
+            + ","
+            + entry.remunerator
+            + ","
+            + entry.info;
+        writeFileSync("test.csv", csvString);
+        await request(Server)
+            .post(`/api/v1/bills/import`)
+            .set('content-type','multipart/form-data')
+            .attach('csv',
+                "test.csv")
+            .field("clear","false")
+            .set('Authorization', 'bearer ' + rundata.token)
+            .then((res) => {
+                expect(res.status).to.equal(200);
+                expect(res.body).to.have.property("count");
+                expect(res.body.count).to.equal(1);
+
+                
+            }).finally(() => {
+
+                unlinkSync("test.csv");
+            });
+        // we would expect to now have 2 entries in the database
+        await request(Server)
+        .get('/api/v1/bills')
+        .query({
+            perPage: 300,
+            page: 1,
+        })
+        .set('Authorization', 'bearer ' + rundata.token)
+        .then((r) => {
+            expect(r.body).to.have.property("data");
+            expect(r.body.data).to.be.an("array").of.length(2);
+        });
+    });
+
+    it('can import new entries from csv and clear existing', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        const entry = EntryBuilder.default();
+        const csvString = "date,amount,category,remunerator,info\n" 
+            + new Date(entry.date).toISOString()
+            + ","
+            + entry.value
+            + ","
+            + entry.category
+            + ","
+            + entry.remunerator
+            + ","
+            + entry.info;
+        writeFileSync("test.csv", csvString);
+        await request(Server)
+            .post(`/api/v1/bills/import`)
+            .set('content-type','multipart/form-data')
+            .attach('csv',
+                "test.csv")
+            .field("clear","true")
+            .set('Authorization', 'bearer ' + rundata.token)
+            .then((res) => {
+                expect(res.status).to.equal(200);
+                expect(res.body).to.have.property("count");
+                expect(res.body.count).to.equal(1);
+
+                
+            }).finally(() => {
+
+                unlinkSync("test.csv");
+            });
+        // we would expect to now have 1 entries in the database
+        await request(Server)
+        .get('/api/v1/bills')
+        .query({
+            perPage: 300,
+            page: 1,
+        })
+        .set('Authorization', 'bearer ' + rundata.token)
+        .then((r) => {
+            expect(r.body).to.have.property("data");
+            expect(r.body.data).to.be.an("array").of.length(1);
+        });
+    });
+
+    it('can import new entries from csv and clear existing and not touch others', async () => {
+        const rundata = await loginUserAndCreateEntry();
+        const rundata2 = await loginUserAndCreateEntry();
+        const entry = EntryBuilder.default();
+        const csvString = "date,amount,category,remunerator,info\n" 
+            + new Date(entry.date).toISOString()
+            + ","
+            + entry.value
+            + ","
+            + entry.category
+            + ","
+            + entry.remunerator
+            + ","
+            + entry.info;
+        writeFileSync("test.csv", csvString);
+        await request(Server)
+            .post(`/api/v1/bills/import`)
+            .set('content-type','multipart/form-data')
+            .attach('csv',
+                "test.csv")
+            .field("clear","true")
+            .set('Authorization', 'bearer ' + rundata.token)
+            .then((res) => {
+                expect(res.status).to.equal(200);
+                expect(res.body).to.have.property("count");
+                expect(res.body.count).to.equal(1);
+
+                
+            }).finally(() => {
+
+                unlinkSync("test.csv");
+            });
+        // we would expect to now have 1 entry in the database
+        await request(Server)
+        .get('/api/v1/bills')
+        .query({
+            perPage: 300,
+            page: 1,
+        })
+        .set('Authorization', 'bearer ' + rundata.token)
+        .then((r) => {
+            expect(r.body).to.have.property("data");
+            expect(r.body.data).to.be.an("array").of.length(1);
+        });
+
+        // we would expect to now have 1 entry in the database
+        await request(Server)
+        .get('/api/v1/bills')
+        .query({
+            perPage: 300,
+            page: 1,
+        })
+        .set('Authorization', 'bearer ' + rundata2.token)
+        .then((r) => {
+            expect(r.body).to.have.property("data");
+            expect(r.body.data).to.be.an("array").of.length(1);
+        });
     });
 });

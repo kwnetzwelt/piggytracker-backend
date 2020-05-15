@@ -398,6 +398,43 @@ paths:
           description: Format of category or remunerator descriptor not correct
         401:
           description: Unauthorized
+  /bills/import:
+    post:
+      consumes:
+        - multipart/form-data
+      tags:
+        - Authenticated
+        - Entries
+      description: Upload a csv file of entries to the database. 
+      parameters:
+        - name: clear
+          in: formData
+          description: if this is set to TRUE all existing entries will be removed prior to inserting the provided entries. 
+          required: false
+          default: false
+          type: "boolean"
+        - name: csv
+          in: formData
+          description: the csv data
+          required: false
+          type: "file"
+      responses:
+        '200':
+          description: Success
+  /bills/export:
+    get:
+      produces:
+        - application/csv
+      tags:
+        - Authenticated
+        - Entries
+      description: Downloads a csv version of all entries in the database
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: file
+            format: binary
   /bills:
     get:
       tags:
