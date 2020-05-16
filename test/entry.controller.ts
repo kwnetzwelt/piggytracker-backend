@@ -471,7 +471,7 @@ describe('Entry', () => {
 
     it('can export all entries', async () => {
         const rundata = await loginUserAndCreateEntry();
-        const csvString = "date,amount,category,remunerator,info\n" 
+        const csvString = "date,value,category,remunerator,info\n" 
             + new Date(rundata.entry.date).toISOString()
             + ","
             + rundata.entry.value
@@ -496,7 +496,7 @@ describe('Entry', () => {
     it('can import new entries from csv', async () => {
         const rundata = await loginUserAndCreateEntry();
         const entry = EntryBuilder.default();
-        const csvString = "date,amount,category,remunerator,info\n" 
+        const csvString = "date,value,category,remunerator,info\n" 
             + new Date(entry.date).toISOString()
             + ","
             + entry.value
@@ -541,7 +541,7 @@ describe('Entry', () => {
     it('can import new entries from csv and clear existing', async () => {
         const rundata = await loginUserAndCreateEntry();
         const entry = EntryBuilder.default();
-        const csvString = "date,amount,category,remunerator,info\n" 
+        const csvString = "date,value,category,remunerator,info\n" 
             + new Date(entry.date).toISOString()
             + ","
             + entry.value
@@ -587,7 +587,7 @@ describe('Entry', () => {
         const rundata = await loginUserAndCreateEntry();
         const rundata2 = await loginUserAndCreateEntry();
         const entry = EntryBuilder.default();
-        const csvString = "date,amount,category,remunerator,info\n" 
+        const csvString = "date,value,category,remunerator,info\n" 
             + new Date(entry.date).toISOString()
             + ","
             + entry.value

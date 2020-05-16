@@ -105,7 +105,7 @@ export class Controller {
       const transformer = (doc: IEntryModel)=> {
         return {
             date: doc.date.toISOString(),
-            amount: doc.value,
+            value: doc.value,
             category: doc.category,
             remunerator: doc.remunerator,
             info: doc.info
