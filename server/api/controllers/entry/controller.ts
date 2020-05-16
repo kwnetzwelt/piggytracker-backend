@@ -4,7 +4,7 @@ import * as HttpStatus from 'http-status-codes';
 import { UserProfile } from '../../models/user';
 import { IEntryModel, ResponseModel, CreateOrUpdateModel } from '../../models/entry';
 import { PagingResult } from '../../../common/paging.result';
-import {format as csvFormat, writeToStream} from 'fast-csv';
+import {format as csvFormat, writeToString} from 'fast-csv';
 import { UploadedFile } from 'express-fileupload';
 import csvtojson from 'csvtojson';
 
@@ -105,17 +105,18 @@ export class Controller {
       const transformer = (doc: IEntryModel)=> {
         return {
             date: doc.date.toISOString(),
-            amount: doc.value,
+            value: doc.value,
             category: doc.category,
             remunerator: doc.remunerator,
             info: doc.info
         };
       }
-
-      res.setHeader('Content-disposition', `attachment; filename=${filename}`);
-      res.writeHead(200, { 'Content-Type': 'text/csv' });
-      res.flushHeaders();
-      writeToStream(res,docs,{headers: true, transform:transformer});
+      res.attachment(filename);
+      res.type('text/csv');
+      
+      const csv = await writeToString(docs,{headers: true, transform:transformer});
+      
+      res.send(csv);
 
     }catch(err)  {
       return next(err);
