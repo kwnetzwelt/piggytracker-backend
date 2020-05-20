@@ -5,6 +5,7 @@ import {loginRouter, logoutRouter, oauthRouter} from './api/controllers/auth/rou
 import invitesRouter from './api/controllers/invites/router';
 import updatesRouter from './api/controllers/updates/router';
 import imagesRouter from './api/controllers/images/router';
+import healthRouter from './api/controllers/health/router';
 
 export default function routes(app: Application): void {
   app.use('/api/v1/bills', entryRouter);
@@ -14,6 +15,7 @@ export default function routes(app: Application): void {
   app.use('/api/v1/login', loginRouter);
   app.use('/api/v1/logout', logoutRouter);
   app.use('/api/v1/images', imagesRouter);
+  app.use('/health', healthRouter);
   app.use('/', oauthRouter)
   ;
 }
