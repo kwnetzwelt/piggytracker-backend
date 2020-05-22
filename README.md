@@ -1,6 +1,6 @@
-# api3
+# Piggytracker Backend
 
-My cool Mongo, Typescript, Express app
+Backend for piggytracker. See https://www.piggytracker.org for more information. 
 
 ## Quick Start
 
