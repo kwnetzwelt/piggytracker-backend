@@ -24,6 +24,24 @@ produces:
   - application/json
 
 definitions:
+  Remunerator:
+    type: object
+    title: Remunerator Offset
+    properties:
+      name:
+        type: string
+        description: Name of the Remunerator
+      offset:
+        type: number
+        format: digit
+        description: The offset value for this Remunerator
+  RemuneratorCollectionResponse:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Remunerator"
   EntryArrayResponse:
     type: object
     title: paginated entries
@@ -435,6 +453,31 @@ paths:
           schema:
             type: file
             format: binary
+  /remunerator:
+    get:
+      tags:
+        - Authenticated
+        - Remunerators
+      description: Returns all stored offset values for the remunerators of the user
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/RemuneratorCollectionResponse"
+    post:
+      tags:
+        - Authenticated
+        - Remunerators
+      description: Set an offset value for a specific remunerator
+      parameters:
+        - name: remunerator
+          in: body
+          description: provide the remunerator
+          schema:
+            $ref: "#/definitions/Remunerator"
+      responses:
+        200:
+          description: success
   /bills:
     get:
       tags:

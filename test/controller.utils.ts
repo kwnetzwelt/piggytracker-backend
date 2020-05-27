@@ -7,6 +7,7 @@ import { IUserModel, User } from '../server/api/models/user';
 import Mongoose from '../server/common/mongoose';
 import { CreateOrUpdateModel as EntryCreateOrUpdateModel, Entry } from '../server/api/models/entry';
 import { Target, CreateOrUpdateModel as TargetCreateOrUpdateModel } from '../server/api/models/target';
+import { Remunerator } from '../server/api/models/remunerator';
 
 export interface RunData {
     user: IUserModel,
@@ -27,7 +28,8 @@ export async function initDatabase() {
     await Entry.collection.deleteMany({});
     await User.collection.deleteMany({});
     await Target.collection.deleteMany({});
-
+    await Remunerator.collection.deleteMany({});
+    
     return db;
 }
 

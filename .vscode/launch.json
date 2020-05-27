@@ -16,7 +16,7 @@
           "999999",
           "--colors",
           "-g",
-          "can import new entries from csv",
+          "store/receive offset for remunerator",
           "${workspaceFolder}/test/**/*.ts"
         ],
         "internalConsoleOptions": "openOnSessionStart",
