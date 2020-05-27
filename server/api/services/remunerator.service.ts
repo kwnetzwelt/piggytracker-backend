@@ -21,12 +21,21 @@ export class RemuneratorService {
   async create(remuneratorData: IRemuneratorModel): Promise<void> {
     L.info(`create remunerator entry with data ${remuneratorData}`);
 
-    const entry = new Remunerator(remuneratorData);
+    const doc = await Remunerator
+      .findOne({ name: remuneratorData.name, fromUser: remuneratorData.fromUser})
+      .exec() as IRemuneratorModel;
+    if(!doc)
+    {
 
-    const doc = await entry.save() as IRemuneratorModel;
-
-    
+      const entry = new Remunerator(remuneratorData);
+      await entry.save() as IRemuneratorModel;
+    }else
+    {
+      doc.offset = remuneratorData.offset;
+      await doc.save() as IRemuneratorModel;
+    }
   }
+  
 
 }
 
