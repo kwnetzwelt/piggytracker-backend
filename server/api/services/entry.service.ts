@@ -27,7 +27,7 @@ export class EntrysService {
       .exec() as IEntryModel[];
 
     const countResult = await Entry
-      .find({ fromUser }).count();
+      .find({ fromUser,deleted: false }).count();
     return { data: docs, page, total: countResult };
   }
 
