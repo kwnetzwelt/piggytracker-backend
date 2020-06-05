@@ -140,9 +140,9 @@ export class Controller {
           createdCount++;
         }
       }
-      if(Boolean(req.body.clear))
+      if(req.body.clear)
       {
-        EntryService.clearExcept(newIds, (req.user as UserProfile).groupId);
+        await EntryService.clearExcept(newIds, (req.user as UserProfile).groupId);
       }
       return res.status(HttpStatus.OK).json({count:createdCount});
     }catch(err)  {

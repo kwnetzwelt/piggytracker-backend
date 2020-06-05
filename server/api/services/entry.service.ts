@@ -89,11 +89,13 @@ export class EntrysService {
     return docs;
   }
 
-  async clearExcept( ids:string[], fromUser: string): Promise<number>
+  async clearExcept( ids: string[], fromUser: string): Promise<number>
   {
-    const allFromUser = await Entry.find({fromUser, _id: {$nin: ids}}).lean().exec() as IEntryModel[];
+    const allFromUser = await Entry.find({fromUser, _id: {$nin: ids}, deleted: false}).lean().exec() as IEntryModel[];
+    L.debug("deleting " + allFromUser.length);
     for (let index = 0; index < allFromUser.length; index++) {
       const element = allFromUser[index];
+      L.debug("delete");
       await this.remove(element._id,fromUser);
       
     }

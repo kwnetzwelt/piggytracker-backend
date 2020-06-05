@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { mongo } from 'mongoose';
 import L from '../common/logger';
 import { Target } from '../api/models/target';
 
@@ -8,6 +8,7 @@ export default class Mongoose {
   init() {
     L.info("Using connection " + this.connectionURI);
 
+    mongoose.set('useFindAndModify', false);
     //Set up default mongoose connection
     mongoose.connect(this.connectionURI);
 
