@@ -3,7 +3,6 @@ import * as HttpStatus from 'http-status-codes';
 import UserService, { OAuthProvider } from '../../services/user.service';
 import { hashPassword, toProfile, IUserModel } from '../../../api/models/user';
 import { sign } from 'jsonwebtoken';
-import passport from 'passport';
 import { OAuth2Client as GoogleClient } from 'google-auth-library';
 
 export class Controller {
@@ -36,6 +35,10 @@ export class Controller {
             Controller.generateTokenResponse(res, user);
         }
         verify().catch(error => res.status(HttpStatus.BAD_REQUEST).send(error))
+    }
+
+    async oauth2SignIn(req: Request, res: Response) {
+        Controller.generateTokenResponse(res, req.user as IUserModel);
     }
 
     async login(request: Request, response: Response) {
