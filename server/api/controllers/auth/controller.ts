@@ -30,7 +30,7 @@ export class Controller {
             const user = await UserService.findOrCreate(OAuthProvider.Google, payload);
             user.avatarUrl = req.body.avatarUrl;
             await user.save();
-            
+
             console.log(user.avatarUrl);
             Controller.generateTokenResponse(res, user);
         }
@@ -38,8 +38,10 @@ export class Controller {
     }
 
     async oauth2SignIn(req: Request, res: Response) {
-        const data = 
-        "<script>\nwindow.opener.postMessage(" + JSON.stringify(Controller.generateTokenResponseObject(req.user as IUserModel)) + ", \"http://localhost:3000\");\n</script>";
+        const data =
+            "<script>\nwindow.opener.postMessage(" +
+            JSON.stringify(Controller.generateTokenResponseObject(req.user as IUserModel)) +
+            ", \"" + process.env.OAUTH_MESSAGE_ORIGIN + "\");\n</script>";
         res.send(data);
     }
 
