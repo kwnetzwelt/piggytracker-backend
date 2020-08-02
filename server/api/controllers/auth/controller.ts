@@ -12,8 +12,8 @@ export class Controller {
         const token = sign(payload, process.env.JWT_KEY);
         return { message: "ok", token: token, userProfile: userProfile };
     }
-    private static generateTokenResponse(res: Response, user: IUserModel) {
 
+    private static generateTokenResponse(res: Response, user: IUserModel) {
         res.json(Controller.generateTokenResponseObject(user));
     }
 
@@ -38,7 +38,9 @@ export class Controller {
     }
 
     async oauth2SignIn(req: Request, res: Response) {
-        Controller.generateTokenResponse(res, req.user as IUserModel);
+        const data = 
+        "<script>\nwindow.opener.postMessage(" + JSON.stringify(Controller.generateTokenResponseObject(req.user as IUserModel)) + ", \"http://localhost:3000\");\n</script>";
+        res.send(data);
     }
 
     async login(request: Request, response: Response) {
