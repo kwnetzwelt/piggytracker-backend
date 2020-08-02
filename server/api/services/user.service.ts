@@ -14,13 +14,14 @@ interface GoogleOAuth2Profile {
 
 export enum OAuthProvider {
   Google = "google",
+  Keycloak = "keycloak",
 }
 
 export class UserService {
   async findOrCreate(provider: OAuthProvider, profile: GoogleOAuth2Profile) {
     const existingUser = await User
-    .findOne({ provider: provider.toString(), oauthId: profile.sub })
-    .exec() as IUserModel;
+      .findOne({ provider: provider.toString(), oauthId: profile.sub })
+      .exec() as IUserModel;
 
     if (existingUser) return existingUser;
 
@@ -39,7 +40,7 @@ export class UserService {
     if (newUser) return newUser;
   }
 
-  async clearUserGroup(id: string) : Promise<IUserModel> {
+  async clearUserGroup(id: string): Promise<IUserModel> {
     L.info(`clear user groupe for user with id ${id}`);
     const user = await User.findById(id);
     user.groupId = "";
@@ -75,10 +76,10 @@ export class UserService {
       .lean()
       .exec()
   }
-  async setUserGroup(invitedUserId:string, userGroupId:string): Promise<IUserModel>{
+  async setUserGroup(invitedUserId: string, userGroupId: string): Promise<IUserModel> {
     L.info(`set user group on user ${invitedUserId}`);
-    var invitingUser = await User.findById(userGroupId);
-    var invitedUser = await User.findById(invitedUserId);
+    const invitingUser = await User.findById(userGroupId);
+    const invitedUser = await User.findById(invitedUserId);
     invitedUser.groupId = invitingUser._id;
     invitedUser.groupName = invitingUser.fullname;
     const result = await invitedUser.save();

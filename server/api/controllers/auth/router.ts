@@ -11,4 +11,6 @@ export const logoutRouter = express.Router()
     ;
 export const oauthRouter = express.Router()
     .post('/google/tokensignin', controller.tokenSignInGoogle)
+    .get('/auth/sso', passport.authenticate('oauth2'))
+    .get('/auth/sso/callback', passport.authenticate('oauth2', { session: false }), controller.oauth2SignIn)
     ;
