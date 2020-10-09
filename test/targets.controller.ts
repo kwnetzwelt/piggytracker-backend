@@ -379,9 +379,9 @@ describe('Target', () => {
 
     it('list cannot be retrieved by other user', async () => {
         const rundata = await loginUserAndCreateTarget(230);
-        createTarget(rundata, TargetsBuilder.forTid(231).numberOfTotals(2).build());
-        createTarget(rundata, TargetsBuilder.forTid(232).numberOfTotals(2).build());
-        createTarget(rundata, TargetsBuilder.forTid(233).numberOfTotals(2).build());
+        await createTarget(rundata, TargetsBuilder.forTid(231).numberOfTotals(2).build());
+        await createTarget(rundata, TargetsBuilder.forTid(232).numberOfTotals(2).build());
+        await createTarget(rundata, TargetsBuilder.forTid(233).numberOfTotals(2).build());
 
         const otherlogin = await loginUser();
 

@@ -1,46 +1,43 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "Mocha Tests",
-        "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-        "args": [
-          "-u",
-          "tdd",
-          "--timeout",
-          "999999",
-          "--colors",
-          //"-g",
-          //"can clear group for user",
-          "${workspaceFolder}/test/**/*.ts"
-        ],
-        "internalConsoleOptions": "openOnSessionStart",
-        "skipFiles": [
-          "<node_internals>/**"
-        ]
-      },
-      {
-          "type": "node",
-          "request": "attach",
-          "name": "Attach",
-          "port": 9229
-      },
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "Debug Server",
-        "runtimeExecutable": "nodemon",
-        "runtimeArgs": ["--exec", "babel-node"],
-        "program": "${workspaceFolder}/server/index.js",
-        "restart": true,
-        "console": "integratedTerminal",
-        "internalConsoleOptions": "neverOpen"
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "command": "npm run dev",
+      "name": "Debug server",
+      "request": "launch",
+      "type": "node-terminal",
+      "env": {
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0"
       }
-    ]
-  }
-  
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Mocha Tests",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "args": [
+        "-u",
+        "tdd",
+        "--timeout",
+        "999999",
+        "--colors",
+        "-g",
+        "store/receive offset for remunerator",
+        "${workspaceFolder}/test/**/*.ts"
+      ],
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach",
+      "port": 9229
+    }
+  ]
+}

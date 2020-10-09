@@ -24,6 +24,24 @@ produces:
   - application/json
 
 definitions:
+  Remunerator:
+    type: object
+    title: Remunerator Offset
+    properties:
+      name:
+        type: string
+        description: Name of the Remunerator
+      offset:
+        type: number
+        format: digit
+        description: The offset value for this Remunerator
+  RemuneratorCollectionResponse:
+    type: object
+    properties:
+      data:
+        type: array
+        items:
+          $ref: "#/definitions/Remunerator"
   EntryArrayResponse:
     type: object
     title: paginated entries
@@ -71,7 +89,8 @@ definitions:
       category:
         type: string
         description: The name of the category
-        example: "car"
+        example: car
+        default: ""
       value:
         type: number
         format: digit
@@ -94,6 +113,7 @@ definitions:
       category:
         type: string
         example: car
+        default: ""
       info:
         type: string
         default: ""
@@ -214,6 +234,7 @@ definitions:
       category:
         type: string
         example: car
+        default: ""
       info:
         type: string
         default: ""
@@ -237,6 +258,7 @@ definitions:
       category:
         type: string
         example: car
+        default: ""
       info:
         type: string
         default: ""
@@ -304,12 +326,158 @@ paths:
       responses:
         200:
           description: Success
-          schema:
-            $ref: "#/definitions/EntryArrayResponse"
         401:
           description: Unauthorized
         500:
           description: Internal Server Error
+  /images/remunerator/{remunerator}:
+    delete:
+      description: remove icons for your categories and team members. Either a category or remunerator parameter is required. 
+      tags:
+        - Authenticated
+      parameters:
+        - name: remunerator
+          in: path
+          description: a remunerator descriptor. format does only allow values matching /[^-z0-9-]/
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: Success
+        400:
+          description: Format of category or remunerator descriptor not correct
+        401:
+          description: Unauthorized
+  /images/remunerator:
+    post:
+      description: add icons for your categories and team members. Either a category or remunerator parameter is required. 
+      consumes:
+        - multipart/form-data
+      tags:
+        - Authenticated
+      parameters:
+        - name: remunerator
+          in: formData
+          description: a remunerator descriptor. format does only allow values matching /[^-z0-9-]/
+          required: false
+          type: "string"
+        - name: image
+          in: formData
+          description: the image data
+          required: true
+          type: "file"
+      responses:
+        200:
+          description: Success
+        400:
+          description: Format of category or remunerator descriptor not correct
+        401:
+          description: Unauthorized
+  /images/category/{category}:
+    delete:
+      description: remove icons for your categories.
+      tags:
+        - Authenticated
+      parameters:
+        - name: category
+          in: path
+          description: a category descriptor. format does only allow values matching /[^-z0-9-]/
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: Success
+        400:
+          description: Format of category or remunerator descriptor not correct
+        401:
+          description: Unauthorized
+  /images/category:
+    post:
+      description: add icons for your categories and team members. Either a category or remunerator parameter is required. 
+      consumes:
+        - multipart/form-data
+      tags:
+        - Authenticated
+      parameters:
+        - name: category
+          in: formData
+          description: a category descriptor. format does only allow values matching /[^-z0-9-]/
+          required: false
+          type: "string"
+        - name: image
+          in: formData
+          description: the image data
+          required: true
+          type: "file"
+      responses:
+        200:
+          description: Success
+        400:
+          description: Format of category or remunerator descriptor not correct
+        401:
+          description: Unauthorized
+  /bills/import:
+    post:
+      consumes:
+        - multipart/form-data
+      tags:
+        - Authenticated
+        - Entries
+      description: Upload a csv file of entries to the database. 
+      parameters:
+        - name: clear
+          in: formData
+          description: if this is set to TRUE all existing entries will be removed prior to inserting the provided entries. 
+          required: false
+          default: false
+          type: "boolean"
+        - name: csv
+          in: formData
+          description: the csv data
+          required: false
+          type: "file"
+      responses:
+        '200':
+          description: Success
+  /bills/export:
+    get:
+      produces:
+        - application/csv
+      tags:
+        - Authenticated
+        - Entries
+      description: Downloads a csv version of all entries in the database
+      responses:
+        '200':
+          description: Success
+          schema:
+            type: file
+            format: binary
+  /remunerator:
+    get:
+      tags:
+        - Authenticated
+        - Remunerators
+      description: Returns all stored offset values for the remunerators of the user
+      responses:
+        200:
+          description: success
+          schema:
+            $ref: "#/definitions/RemuneratorCollectionResponse"
+    post:
+      tags:
+        - Authenticated
+        - Remunerators
+      description: Set an offset value for a specific remunerator
+      parameters:
+        - name: remunerator
+          in: body
+          description: provide the remunerator
+          schema:
+            $ref: "#/definitions/Remunerator"
+      responses:
+        200:
+          description: success
   /bills:
     get:
       tags:

@@ -1,6 +1,6 @@
-# api3
+# Piggytracker Backend
 
-My cool Mongo, Typescript, Express app
+Backend for piggytracker. See https://www.piggytracker.org for more information. 
 
 ## Quick Start
 
@@ -11,7 +11,7 @@ Get started developing...
 npm install
 
 # run in development mode
-docker-compose -f docker-compose-dev.yml up -d
+npm run docker
 npm run dev
 
 # run tests
@@ -107,3 +107,19 @@ npm run test:debug
 #### Debug with VSCode
 
 Add these [contents](https://github.com/cdimascio/generator-express-no-stress/blob/next/assets/.vscode/launch.json) to your `.vscode/launch.json` file
+
+# Configuration with `.env` file
+
+`OAUTH_AUTH_URL` address of the authentication server. The user gets redirected to this address upon login.
+
+`OAUTH_TOKEN_URL` address to obtain the token from the authentication server.
+
+`OAUTH_CLIENT_ID` client id to be used when authentication with an authentication server.
+
+`OAUTH_CLIENT_SECRET` the client secret for the OAUTH_CLIENT_ID.
+
+`OAUTH_CALLBACK_URL` the address of the backend to process the oauth redirect after the user has authenticated on the authentication server.
+
+`OAUTH_USERINFO_URL`the address to obtain profile data for the logged in user.
+
+`OAUTH_MESSAGE_ORIGIN` the address (protocoll, host, port) of the front end that receives the login token.

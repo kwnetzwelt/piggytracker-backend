@@ -102,7 +102,9 @@ describe('Auth', () => {
                     .to.be.an('object')
                     .to.eql({
                         username: rundata.user.username,
-                        fullname: rundata.user.fullname
+                        fullname: rundata.user.fullname,
+                        groupId: rundata.user.groupId,
+                        groupName: rundata.user.fullname,
                     });
             });
     });

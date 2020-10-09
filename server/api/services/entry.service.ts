@@ -27,7 +27,7 @@ export class EntrysService {
       .exec() as IEntryModel[];
 
     const countResult = await Entry
-      .find({ fromUser }).count();
+      .find({ fromUser,deleted: false }).count();
     return { data: docs, page, total: countResult };
   }
 
@@ -81,6 +81,25 @@ export class EntrysService {
     if (!doc) throw new errors.HttpError(HttpStatus.NOT_FOUND);
 
     return doc;
+  }
+  async export(fromUser: string): Promise<IEntryModel[]>
+  {
+    const docs = await Entry.
+      find({fromUser,deleted:false}).lean().exec() as IEntryModel[];
+    return docs;
+  }
+
+  async clearExcept( ids: string[], fromUser: string): Promise<number>
+  {
+    const allFromUser = await Entry.find({fromUser, _id: {$nin: ids}, deleted: false}).lean().exec() as IEntryModel[];
+    L.debug("deleting " + allFromUser.length);
+    for (let index = 0; index < allFromUser.length; index++) {
+      const element = allFromUser[index];
+      L.debug("delete");
+      await this.remove(element._id,fromUser);
+      
+    }
+    return allFromUser.length;
   }
 }
 
