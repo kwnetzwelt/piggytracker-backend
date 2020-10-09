@@ -8,7 +8,7 @@
     "start": "node dist/index.js",
     "compile": "ts-node build.ts && tsc",
     "docker": "docker-compose -f docker-compose-dev.yml up -d",
-    "dev": "nodemon server/index.ts | pino-pretty",
+    "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 nodemon server/index.ts | pino-pretty",
     "dev:debug": "nodemon --exec 'node -r ts-node/register --inspect-brk' server/index.ts | pino-pretty",
     "test": "mocha test/**/*.ts --exit",
     "test:coverage": "nyc mocha test/**/*.ts --exit",

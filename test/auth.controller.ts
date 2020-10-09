@@ -131,4 +131,93 @@ describe('Auth', () => {
             });
     });
 
+    it('should send tokens in a known format', async () => {
+        const firstUser = await createUser();
+        await loginUser(firstUser);
+
+        const otherUser = await loginUser();
+
+        const firstUserTokenParts = firstUser.token.split('.');
+        const otherUserTokenParts = otherUser.token.split('.');
+
+        const firstUserpayload = JSON.parse((new Buffer(firstUserTokenParts[1], 'base64')).toString('ascii'));
+        const otherUserpayload = JSON.parse((new Buffer(otherUserTokenParts[1], 'base64')).toString('ascii'));
+
+        const firstUserIdFromToken = firstUserpayload.id;
+        const otherUserIdFromToken = otherUserpayload.id;
+
+        expect(otherUser.token).to.not.equal(firstUser.token);
+        expect(firstUserTokenParts).to.be.an('array').of.lengthOf(3);
+        expect(otherUserTokenParts).to.be.an('array').of.lengthOf(3);
+        expect(firstUserIdFromToken).to.equal(String(firstUser.user._id));
+        expect(otherUserIdFromToken).to.equal(String(otherUser.user._id));
+        expect(firstUserIdFromToken).to.not.be.equal(otherUserIdFromToken);
+    });
+
+    it('should detect a modified field within the token', async () => {
+        const firstUser = await createUser();
+        await loginUser(firstUser);
+
+        const otherUser = await loginUser();
+
+        const firstUserTokenParts = firstUser.token.split('.');
+        const otherUserTokenParts = otherUser.token.split('.');
+
+        const firstUserpayload = JSON.parse((new Buffer(firstUserTokenParts[1], 'base64')).toString('ascii'));
+        const otherUserpayload = JSON.parse((new Buffer(otherUserTokenParts[1], 'base64')).toString('ascii'));
+
+        otherUserpayload.id = firstUserpayload.id;
+        otherUserTokenParts[1] = new Buffer(JSON.stringify(otherUserpayload)).toString('base64');
+
+        const fakeToken1 = otherUserTokenParts.join('.');
+
+        return request(Server)
+            .get('/api/v1/login')
+            .set('Authorization', 'bearer ' + fakeToken1)
+            .send()
+            .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('should detect tampered tokens', async () => {
+        const firstUser = await createUser();
+        await loginUser(firstUser);
+
+        const otherUser = await loginUser();
+
+        const firstUserTokenParts = firstUser.token.split('.');
+        const otherUserTokenParts = otherUser.token.split('.');
+
+        const firstUserpayload = JSON.parse((new Buffer(firstUserTokenParts[1], 'base64')).toString('ascii'));
+        const otherUserpayload = JSON.parse((new Buffer(otherUserTokenParts[1], 'base64')).toString('ascii'));
+
+        otherUserpayload.id = firstUserpayload.id;
+        otherUserTokenParts[1] = new Buffer(JSON.stringify(otherUserpayload)).toString('base64');
+
+        const fakeToken2 = ([otherUserTokenParts[0], firstUserTokenParts[1], otherUserTokenParts[2]]).join('.');
+
+        return request(Server)
+            .get('/api/v1/login')
+            .set('Authorization', 'bearer ' + fakeToken2)
+            .send()
+            .expect(HttpStatus.UNAUTHORIZED);
+    });
+
+    it('should detect invalid signature', async () => {
+        const firstUser = await createUser();
+        await loginUser(firstUser);
+
+        const otherUser = await loginUser();
+
+        const otherUserTokenParts = otherUser.token.split('.');
+
+        otherUserTokenParts[2] = 'M0ipMVcfpz-gYILPeVZ2Bvz0tXAaZEsK7NcYLl-8mLI';
+
+        const fakeToken1 = otherUserTokenParts.join('.');
+
+        return request(Server)
+            .get('/api/v1/login')
+            .set('Authorization', 'bearer ' + fakeToken1)
+            .send()
+            .expect(HttpStatus.UNAUTHORIZED);
+    });
 });
