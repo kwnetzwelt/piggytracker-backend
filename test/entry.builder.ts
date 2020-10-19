@@ -21,6 +21,7 @@ export class EntryBuilder {
     public build(): IEntryModel {
         return new Entry({
             date: new Date(),
+            deleted: false,
             value: TestRandom.r(4000, 0),
             remunerator: TestRandom.randomString(24, 're-'),
             category: TestRandom.randomString(6, 'cat-'),
@@ -34,6 +35,7 @@ export class EntryBuilder {
         const entry = this.build();
         return {
             date: entry.date?.toISOString().substring(0, 10),
+            deleted: entry.deleted,
             value: entry.value,
             remunerator: entry.remunerator,
             category: entry.category,

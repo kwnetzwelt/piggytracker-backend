@@ -39,7 +39,7 @@ export class EntrysService {
     }
 
     const doc = await Entry
-      .findOne({ _id: id, fromUser,deleted: false })
+      .findOne({ _id: id, fromUser })
       .lean()
       .exec() as IEntryModel;
 
@@ -85,7 +85,7 @@ export class EntrysService {
   async export(fromUser: string): Promise<IEntryModel[]>
   {
     const docs = await Entry.
-      find({fromUser,deleted:false}).lean().exec() as IEntryModel[];
+      find({fromUser}).lean().exec() as IEntryModel[];
     return docs;
   }
 

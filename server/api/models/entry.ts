@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 
 export interface CreateOrUpdateModel {
   date: string;
+  deleted: boolean;
   value: number;
   remunerator: string;
   category: string;
@@ -15,6 +16,7 @@ export interface ResponseModel extends CreateOrUpdateModel {
 }
 export interface IEntryModel extends mongoose.Document {
   date: Date;
+  deleted: boolean;
   value: number;
   remunerator: string;
   category: string;
@@ -22,7 +24,6 @@ export interface IEntryModel extends mongoose.Document {
   changed: Date;
   dummy: boolean;
   fromUser: string;
-  deleted: boolean;
 }
 
 export interface EntryArrayResponse {

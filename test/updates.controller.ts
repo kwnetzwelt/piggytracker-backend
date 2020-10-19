@@ -36,6 +36,7 @@ describe('Entry', () => {
         const entry = EntryBuilder.default();
         rundata.entry = {
             date: entry.date.toISOString().substring(0, 10),
+            deleted: entry.deleted,
             value: entry.value,
             remunerator: entry.remunerator,
             category: entry.category,

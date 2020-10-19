@@ -38,6 +38,7 @@ describe('Entry', () => {
         const entry = EntryBuilder.default();
         rundata.entry = {
             date: entry.date.toISOString().substring(0, 10),
+            deleted: entry.deleted,
             value: entry.value,
             remunerator: entry.remunerator,
             category: entry.category,
@@ -471,8 +472,10 @@ describe('Entry', () => {
 
     it('can export all entries', async () => {
         const rundata = await loginUserAndCreateEntry();
-        const csvString = "date,value,category,remunerator,info\n" 
+        const csvString = "date,deleted,value,category,remunerator,info\n" 
             + new Date(rundata.entry.date).toISOString()
+            + ","
+            + rundata.entry.deleted
             + ","
             + rundata.entry.value
             + ","

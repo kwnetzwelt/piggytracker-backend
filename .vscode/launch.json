@@ -25,7 +25,7 @@
         "999999",
         "--colors",
         "-g",
-        "store/receive offset for remunerator",
+        "can be updated and getting entry again shows new field values",
         "${workspaceFolder}/test/**/*.ts"
       ],
       "internalConsoleOptions": "openOnSessionStart",
