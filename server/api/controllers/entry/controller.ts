@@ -14,6 +14,7 @@ export class Controller {
     return {
       _id: String(doc._id),
       date: doc.date?.toISOString().substring(0, 10),
+      deleted: doc.deleted,
       value: doc.value,
       remunerator: doc.remunerator,
       category: doc.category,
@@ -25,6 +26,7 @@ export class Controller {
     const body = (req.body || {});
     return {
       date: body.date,
+      deleted: body.deleted ?? false,
       value: body.value,
       remunerator: body.remunerator,
       category: body.category,
@@ -105,6 +107,7 @@ export class Controller {
       const transformer = (doc: IEntryModel)=> {
         return {
             date: doc.date.toISOString(),
+            deleted: doc.deleted,
             value: doc.value,
             category: doc.category,
             remunerator: doc.remunerator,
@@ -128,10 +131,10 @@ export class Controller {
       const file = req.files['csv'] as UploadedFile;
       const contents = file.data.toString('utf8');
       let createdCount = 0;
-      let result = await csvtojson().fromString(contents) as CreateOrUpdateModel[];
+      const result = await csvtojson().fromString(contents) as CreateOrUpdateModel[];
       const newIds = new Array<string>();
       for (const i in result) {
-        if (result.hasOwnProperty(i)) {
+        if (result[i] !== undefined) {
           const element = result[i];
           const fields = Controller.extractWriteableFieldsFromRequestBody({body: element} as Request);
           fields.fromUser = (req.user as UserProfile).groupId;
