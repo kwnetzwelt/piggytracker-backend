@@ -39,7 +39,7 @@ export class EntrysService {
     }
 
     const doc = await Entry
-      .findOne({ _id: id, fromUser })
+      .findOne({ _id: id, deleted: false, fromUser })
       .lean()
       .exec() as IEntryModel;
 
