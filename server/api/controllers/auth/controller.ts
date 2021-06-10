@@ -37,6 +37,26 @@ export class Controller {
         verify().catch(error => res.status(HttpStatus.BAD_REQUEST).send(error))
     }
 
+    async tokenSignInGoogleOnIOS(req: Request, res: Response, next: NextFunction) {
+        const client = new GoogleClient(process.env.GOOGLE_CLIENT_ID_IOS);
+        async function verify() {
+            const ticket = await client.verifyIdToken({
+                idToken: req.body.idtoken,
+                audience: process.env.GOOGLE_CLIENT_ID_IOS,  // Specify the CLIENT_ID of the app that accesses the backend
+                // Or, if multiple clients access the backend:
+                //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+            });
+            const payload = ticket.getPayload();
+            const user = await UserService.findOrCreate(OAuthProvider.Google, payload);
+            user.avatarUrl = req.body.avatarUrl;
+            await user.save();
+
+            console.log(user.avatarUrl);
+            Controller.generateTokenResponse(res, user);
+        }
+        verify().catch(error => res.status(HttpStatus.BAD_REQUEST).send(error))
+    }
+
     async oauth2SignIn(req: Request, res: Response) {
         const data =
             "<script>\nwindow.opener.postMessage(" +
